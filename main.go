@@ -14,17 +14,19 @@ import (
 const MASTER_ID uint64 = 1006554341
 
 func main() {
-	client := qbot.NewClient(&qbot.Config{
+	bot := qbot.NewClient(&qbot.Config{
 		Address:      "ws://localhost:3001",
 		Reconnect:    3 * time.Second,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	})
-	defer client.Close()
+	defer bot.Close()
+
+	bot.HandleGroupMessage(onGroupMessage)
+	bot.HandlePrivateMessage(onPrivateMessage)
 
 	time.Sleep(1 * time.Second)
-
-	_, err := client.SendPrivateMsg(MASTER_ID, "Hello master!", false)
+	_, err := bot.SendPrivateMsg(MASTER_ID, "Hello master!", false)
 	if err != nil {
 		log.Printf("send message failed: %v", err)
 	}

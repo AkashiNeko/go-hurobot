@@ -21,6 +21,15 @@ func NewClient(cfg *Config) *Client {
 	return client
 }
 
+func (c *Client) Close() {
+	if c.conn != nil {
+		c.conn.Close()
+	}
+	if c.stopChan != nil {
+		close(c.stopChan)
+	}
+}
+
 func (c *Client) connect() {
 	for {
 		select {
@@ -64,6 +73,7 @@ func (c *Client) messageHandler() {
 	}()
 
 	for {
+		// Receive message
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			log.Printf("read error: %v", err)
@@ -71,33 +81,32 @@ func (c *Client) messageHandler() {
 			return
 		}
 
-		var heartbeat HeartbeatMessage
-		if err := json.Unmarshal(msg, &heartbeat); err == nil {
-			log.Printf("Received heartbeat: %+v", heartbeat)
+		// Unmarshal to map
+		jsonMap := make(map[string]any)
+		if err := json.Unmarshal(msg, &jsonMap); err != nil {
+			log.Printf("parse message error: %v", err)
 			continue
 		}
 
-		var pushMsg PushMessage
-		if err := json.Unmarshal(msg, &pushMsg); err == nil {
-			log.Printf("Received push message: %+v", pushMsg)
-			continue
-		}
-
-		var resp CQResponse
-		if err := json.Unmarshal(msg, &resp); err == nil {
-			c.mutex.Lock()
-			if val, ok := c.pendingEcho.Load(resp.Echo); ok {
-				pr := val.(*pendingResponse)
-				pr.timer.Stop()
-				pr.ch <- &resp
-				c.pendingEcho.Delete(resp.Echo)
+		if jsonMap["echo"] != nil {
+			// Response to sent message
+			var resp cqResponse
+			if err := json.Unmarshal(msg, &resp); err == nil {
+				c.mutex.Lock()
+				if val, ok := c.pendingEcho.Load(resp.Echo); ok {
+					pr := val.(*pendingResponse)
+					pr.timer.Stop()
+					pr.ch <- &resp
+					c.pendingEcho.Delete(resp.Echo)
+				}
 				c.mutex.Unlock()
-			} else {
-				c.mutex.Unlock()
-				log.Printf("Received event: %s", string(msg))
+			}
+		} else if postType, exists := jsonMap["post_type"]; exists {
+			// Server-initiated push
+			if str, ok := postType.(string); ok && str != "" {
+				c.handleEvents(&str, &msg, &jsonMap)
 			}
 		}
-		log.Printf("parse message error: %v", err)
 	}
 }
 
@@ -109,21 +118,12 @@ func (c *Client) reconnect() {
 	c.connect()
 }
 
-func (c *Client) Close() {
-	if c.conn != nil {
-		c.conn.Close()
-	}
-	if c.stopChan != nil {
-		close(c.stopChan)
-	}
-}
-
-func (c *Client) sendJSON(req *CQRequest) (*CQResponse, error) {
+func (c *Client) sendJSON(req *cqRequest) (*cqResponse, error) {
 	// Generate echo key
 	echo := uuid.New().String()
 	req.Echo = echo
 
-	respCh := make(chan *CQResponse, 1)
+	respCh := make(chan *cqResponse, 1)
 	timeout := time.NewTimer(5 * time.Second)
 	defer timeout.Stop()
 
@@ -154,6 +154,8 @@ func (c *Client) sendJSON(req *CQRequest) (*CQResponse, error) {
 	case resp := <-respCh:
 		if resp == nil {
 			return nil, fmt.Errorf("response channel closed")
+		} else {
+			log.Printf("Sent message: %v", req.Params)
 		}
 		return resp, nil
 	case <-timeout.C:

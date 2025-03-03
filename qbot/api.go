@@ -1,7 +1,7 @@
 package qbot
 
 func (c *Client) SendPrivateMsg(userID uint64, message string, autoEscape bool) (uint64, error) {
-	req := CQRequest{
+	req := cqRequest{
 		Action: "send_private_msg",
 		Params: map[string]any{
 			"user_id": userID,
@@ -18,7 +18,7 @@ func (c *Client) SendPrivateMsg(userID uint64, message string, autoEscape bool) 
 }
 
 func (c *Client) SendGroupMsg(groupID uint64, message string, autoEscape bool) (uint64, error) {
-	req := CQRequest{
+	req := cqRequest{
 		Action: "send_group_msg",
 		Params: map[string]any{
 			"group_id":    groupID,
