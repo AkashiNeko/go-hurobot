@@ -1,0 +1,15 @@
+version: "3"
+services:
+    napcat:
+        hostname: napcat
+        environment:
+            - NAPCAT_UID=1000 # id -u
+            - NAPCAT_GID=1000 # id -g
+        ports:
+            - 3000:3000 # HTTP server
+            - 3001:3001 # WebSocket server
+            - 6099:6099 # WebUI
+        container_name: napcat
+        network_mode: bridge
+        restart: always
+        image: mlikiowa/napcat-docker:latest
