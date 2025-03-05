@@ -1,15 +1,40 @@
 package main
 
-import "go-hurobot/qbot"
+import (
+	"go-hurobot/cmds"
+	"go-hurobot/qbot"
+	"strings"
 
-func onGroupMessage(c *qbot.Client, msg qbot.GroupMessage) {
-	if msg.RawMessage == "hello" {
-		c.SendGroupMsg(msg.GroupID, "world", false)
+	"github.com/google/shlex"
+)
+
+func getCommandName(s string) string {
+	const maxLength = 20
+	singleCmd := false
+	if len(s) > maxLength {
+		s = s[:maxLength]
+	} else {
+		singleCmd = true
 	}
+
+	if index := strings.Index(s, " "); index != -1 {
+		return s[:index]
+	} else if singleCmd {
+		return s
+	}
+	return ""
 }
 
-func onPrivateMessage(c *qbot.Client, msg qbot.PrivateMessage) {
-	if msg.RawMessage == "hello" {
-		c.SendPrivateMsg(msg.Sender.UserID, "world", false)
+func onMessage(c *qbot.Client, msg *qbot.Message) {
+	if handler := cmds.FindCommand(getCommandName(msg.RawMessage)); handler != nil {
+		if args, err := shlex.Split(msg.RawMessage); err == nil {
+			handler(c, args, msg)
+		}
+		return
 	}
+
+	// for i, arg := range args {
+	// 	res := fmt.Sprintf("args[%d]: %q", i, arg)
+	// 	c.SendPrivateMsg(msg.Sender.UserID, res, false)
+	// }
 }

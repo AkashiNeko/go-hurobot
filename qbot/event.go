@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func (c *Client) handleEvents(postType *string, msg *[]byte, jsonMap *map[string]any) {
+func (c *Client) handleEvents(postType *string, msgStr *[]byte, jsonMap *map[string]any) {
 	switch *postType {
 	case "meta_event":
 		// heartbeat, connection state..
@@ -13,29 +13,18 @@ func (c *Client) handleEvents(postType *string, msg *[]byte, jsonMap *map[string
 	case "message":
 		switch (*jsonMap)["message_type"] {
 		case "private":
-			// TODO
-			if c.eventHandlers.onPrivateMessage != nil {
-				var privateMessage PrivateMessage
-				if json.Unmarshal(*msg, &privateMessage) == nil {
-					go c.eventHandlers.onPrivateMessage(c, privateMessage)
-				}
-			}
+			fallthrough
 		case "group":
-			// TODO
-			if c.eventHandlers.onGroupMessage != nil {
-				var groupMessage GroupMessage
-				if json.Unmarshal(*msg, &groupMessage) == nil {
-					go c.eventHandlers.onGroupMessage(c, groupMessage)
+			if c.eventHandlers.onMessage != nil {
+				var msg Message
+				if json.Unmarshal(*msgStr, &msg) == nil {
+					go c.eventHandlers.onMessage(c, &msg)
 				}
 			}
 		}
 	}
 }
 
-func (c *Client) HandleGroupMessage(handler func(c *Client, msg GroupMessage)) {
-	c.eventHandlers.onGroupMessage = handler
-}
-
-func (c *Client) HandlePrivateMessage(handler func(c *Client, msg PrivateMessage)) {
-	c.eventHandlers.onPrivateMessage = handler
+func (c *Client) HandleMessage(handler func(c *Client, msg *Message)) {
+	c.eventHandlers.onMessage = handler
 }

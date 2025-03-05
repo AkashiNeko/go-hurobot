@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,14 +21,13 @@ func main() {
 	})
 	defer bot.Close()
 
-	bot.HandleGroupMessage(onGroupMessage)
-	bot.HandlePrivateMessage(onPrivateMessage)
+	bot.HandleMessage(onMessage)
 
-	time.Sleep(1 * time.Second)
-	_, err := bot.SendPrivateMsg(MASTER_ID, "Hello master!", false)
-	if err != nil {
-		log.Printf("send message failed: %v", err)
-	}
+	// time.Sleep(1 * time.Second)
+	// _, err := bot.SendPrivateMsg(MASTER_ID, "Hello master!", false)
+	// if err != nil {
+	// 	log.Printf("send message failed: %v", err)
+	// }
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)

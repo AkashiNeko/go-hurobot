@@ -22,37 +22,18 @@ type Client struct {
 	pendingEcho   sync.Map
 	mutex         sync.Mutex
 	eventHandlers struct {
-		onGroupMessage   func(c *Client, msg GroupMessage)
-		onPrivateMessage func(c *Client, msg PrivateMessage)
+		onMessage func(c *Client, msg *Message)
 	}
 }
 
-type GroupMessage struct {
+type Message struct {
 	GroupID   uint64 `json:"group_id"`
 	Time      uint64 `json:"time"`
 	MessageID uint64 `json:"message_id"`
 	Sender    struct {
 		UserID   uint64 `json:"user_id"`
 		Nickname string `json:"nickname"`
-		Card     string `json:"card"`
 		Role     string `json:"role"`
-	} `json:"sender"`
-	RawMessage string `json:"raw_message"`
-	Message    []struct {
-		Type string `json:"type"`
-		Data struct {
-			Text string `json:"text"`
-		} `json:"data"`
-	} `json:"message"`
-}
-
-type PrivateMessage struct {
-	Time      uint64 `json:"time"`
-	MessageID uint64 `json:"message_id"`
-	Sender    struct {
-		UserID   uint64 `json:"user_id"`
-		Nickname string `json:"nickname"`
-		Card     string `json:"card"`
 	} `json:"sender"`
 	RawMessage string `json:"raw_message"`
 	Message    []struct {

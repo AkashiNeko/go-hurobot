@@ -33,3 +33,11 @@ func (c *Client) SendGroupMsg(groupID uint64, message string, autoEscape bool) (
 	}
 	return resp.Data.MessageId, nil
 }
+
+func (c *Client) SendReplyMsg(raw *Message, message string) {
+	if raw.GroupID == 0 {
+		c.SendPrivateMsg(raw.Sender.UserID, message, false)
+	} else {
+		c.SendGroupMsg(raw.GroupID, message, false)
+	}
+}
