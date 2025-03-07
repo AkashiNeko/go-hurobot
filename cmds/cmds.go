@@ -8,6 +8,7 @@ func init() {
 	cmdMap = map[string]func(*qbot.Client, []string, *qbot.Message){
 		"echo":   Echo,
 		"rawmsg": Rawmsg,
+		"grok2":  Grok2,
 	}
 }
 
