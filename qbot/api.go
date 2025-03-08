@@ -10,7 +10,7 @@ func (c *Client) SendPrivateMsg(userID uint64, message string, autoEscape bool) 
 			"auto_escape": autoEscape,
 		},
 	}
-	resp, err := c.sendJSON(&req)
+	resp, err := c.sendJsonWithEcho(&req)
 	if err != nil {
 		return 0, err
 	}
@@ -27,11 +27,24 @@ func (c *Client) SendGroupMsg(groupID uint64, message string, autoEscape bool) (
 		},
 	}
 
-	resp, err := c.sendJSON(&req)
+	resp, err := c.sendJsonWithEcho(&req)
 	if err != nil {
 		return 0, err
 	}
 	return resp.Data.MessageId, nil
+}
+
+func (c *Client) SetGroupSpecialTitle(groupID uint64, UserID uint64, specialTitle string) error {
+	req := cqRequest{
+		Action: "set_group_special_title",
+		Params: map[string]any{
+			"group_id":      groupID,
+			"user_id":       UserID,
+			"special_title": specialTitle,
+		},
+	}
+	err := c.sendJson(&req)
+	return err
 }
 
 func (c *Client) SendReplyMsg(raw *Message, message string) {

@@ -118,7 +118,21 @@ func (c *Client) reconnect() {
 	c.connect()
 }
 
-func (c *Client) sendJSON(req *cqRequest) (*cqResponse, error) {
+func (c *Client) sendJson(req *cqRequest) error {
+	jsonBytes, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+	if c.conn == nil {
+		return fmt.Errorf("connection not ready")
+	}
+	if err := c.conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) sendJsonWithEcho(req *cqRequest) (*cqResponse, error) {
 	// Generate echo key
 	echo := uuid.New().String()
 	req.Echo = echo
@@ -136,17 +150,8 @@ func (c *Client) sendJSON(req *cqRequest) (*cqResponse, error) {
 	c.mutex.Unlock()
 
 	// Send request
-	jsonBytes, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("marshal failed: %v", err)
-	}
-
-	if c.conn == nil {
-		return nil, fmt.Errorf("connection not ready")
-	}
-
-	if err := c.conn.WriteMessage(websocket.TextMessage, jsonBytes); err != nil {
-		return nil, fmt.Errorf("write failed: %v", err)
+	if err := c.sendJson(req); err != nil {
+		return nil, err
 	}
 
 	// Wait for response

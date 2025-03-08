@@ -1,6 +1,7 @@
 package qbot
 
 import (
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -37,10 +38,8 @@ type Message struct {
 	} `json:"sender"`
 	RawMessage string `json:"raw_message"`
 	Message    []struct {
-		Type string `json:"type"`
-		Data struct {
-			Text string `json:"text"`
-		} `json:"data"`
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
 	} `json:"message"`
 }
 
