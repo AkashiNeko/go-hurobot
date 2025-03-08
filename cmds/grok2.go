@@ -65,7 +65,7 @@ func makeGrokRequest(args []string) string {
 		Messages    []Message `json:"messages"`
 		Model       string    `json:"model"`
 		Stream      bool      `json:"stream"`
-		Temperature int       `json:"temperature"`
+		Temperature float64   `json:"temperature"`
 	}
 	request := &Request{}
 	request.Model = "grok-2-latest"
@@ -94,10 +94,10 @@ func makeGrokRequest(args []string) string {
 			request.Model = arg
 			prevArg = ""
 		case "-t":
-			if t, err := strconv.Atoi(arg); err == nil {
+			if t, err := strconv.ParseFloat(arg, 64); err == nil {
 				request.Temperature = t
 			} else {
-				return fmt.Sprintf("temperature 必须是一个整数：... -t >>%s<<", arg)
+				return fmt.Sprintf("temperature 必须是一个数字：... -t >>%s<<", arg)
 			}
 			prevArg = ""
 		case "":
