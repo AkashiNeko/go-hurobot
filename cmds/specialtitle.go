@@ -7,7 +7,7 @@ import (
 	"github.com/buger/jsonparser"
 )
 
-func specialtitle(c *qbot.Client, args []string, raw *qbot.Message) {
+func cmd_specialtitle(c *qbot.Client, args []string, raw *qbot.Message) {
 	if len(args) == 1 {
 		c.SendReplyMsg(raw, "Usage: specialtitle <specialtitle>")
 	} else if len(raw.Message) > 1 && raw.Message[1].Type != "at" {

@@ -15,7 +15,7 @@ import (
 func sendRequest(requestJson string) (result string, err error) {
 	apiKey := config.XaiApiKey
 	if apiKey == "" {
-		return "", errors.New("No x.ai api key")
+		return "", errors.New("no x.ai api key")
 	}
 
 	client := &http.Client{}
@@ -50,7 +50,7 @@ func sendRequest(requestJson string) (result string, err error) {
 		return string(body), nil
 	}
 
-	return "", errors.New(fmt.Sprintf("%s\n\n%s", resp.Status, string(body)))
+	return "", fmt.Errorf("%s\n\n%s", resp.Status, string(body))
 }
 
 func makeGrokRequest(args []string) string {
@@ -157,7 +157,7 @@ func makeGrokRequest(args []string) string {
 	)
 }
 
-func grok2(c *qbot.Client, args []string, raw *qbot.Message) {
+func cmd_grok2(c *qbot.Client, args []string, raw *qbot.Message) {
 	const help = "Usage: grok2 <option> [-s <system content>] [-a <assistant content>] [-u <user content>] [-m <model>] [-t <temperature>]"
 	if len(args) == 1 {
 		c.SendReplyMsg(raw, help)

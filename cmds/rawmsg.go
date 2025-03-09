@@ -7,7 +7,7 @@ import (
 	"go-hurobot/qbot"
 )
 
-func rawmsg(c *qbot.Client, args []string, raw *qbot.Message) {
+func cmd_rawmsg(c *qbot.Client, args []string, raw *qbot.Message) {
 	if len(args) >= 2 && (args[1] == "-f" || args[1] == "--format") {
 		if len(args) >= 3 {
 			switch args[2] {
