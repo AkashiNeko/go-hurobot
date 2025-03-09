@@ -13,15 +13,17 @@ var (
 	NapcatWSURL string
 	MasterID    uint64
 	ProxyURL    url.URL
+	ProxyKey   string
 )
 
 const (
 	// environment values
-	env_NAPCAT_HOST  = "NAPCAT_HOST"
-	env_ACCESS_TOKEN = "ACCESS_TOKEN"
-	env_XAI_API_KEY  = "XAI_API_KEY"
-	env_MASTER_ID    = "MASTER_ID"
-	env_PROXY_URL    = "PROXY_URL"
+	env_NAPCAT_HOST    = "NAPCAT_HOST"
+	env_ACCESS_TOKEN   = "ACCESS_TOKEN"
+	env_XAI_API_KEY    = "XAI_API_KEY"
+	env_MASTER_ID      = "MASTER_ID"
+	env_PROXY_URL      = "PROXY_URL"
+	env_GROK_PROXY_KEY = "GROK_PROXY_KEY"
 )
 
 func init() {
@@ -54,5 +56,14 @@ func init() {
 		} else {
 			log.Fatalf("Parse %s failed: %s", env_PROXY_URL, proxyURLStr)
 		}
+	}
+
+	proxyKey := os.Getenv(env_GROK_PROXY_KEY)
+	if proxyKey != "" {
+		ProxyKey = proxyKey
+		log.Println("Proxy key set, using custom proxy")
+	} else {
+		ProxyKey = ""
+		log.Println("Proxy key not set, requesting directly")
 	}
 }

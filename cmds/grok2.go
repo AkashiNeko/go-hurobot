@@ -27,9 +27,18 @@ func sendRequest(requestJson string) (result string, err error) {
 		}
 	}
 
-	req, err := http.NewRequest("POST", "https://api.x.ai/v1/chat/completions", bytes.NewBuffer([]byte(requestJson)))
+	requestURL := "https://api.x.ai/v1/chat/completions"
+	if config.ProxyKey != "" {
+		requestURL = config.ProxyURL.String() + "/v1/chat/completions"
+	}
+
+	req, err := http.NewRequest("POST", requestURL, bytes.NewBuffer([]byte(requestJson)))
 	if err != nil {
 		return "", err
+	}
+
+	if config.ProxyKey != "" {
+		req.Header.Set("X-Proxy-Key", config.ProxyKey)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
