@@ -9,19 +9,21 @@ import (
 
 var (
 	// export
-	XaiApiKey   string
-	NapcatWSURL string
-	MasterID    uint64
-	ProxyURL    url.URL
+	XaiApiKey     string
+	NapcatWSURL   string
+	MasterID      uint64
+	ProxyURL      url.URL
+	ErikaGrok2Key string
 )
 
 const (
 	// environment values
-	env_NAPCAT_HOST  = "NAPCAT_HOST"
-	env_ACCESS_TOKEN = "ACCESS_TOKEN"
-	env_XAI_API_KEY  = "XAI_API_KEY"
-	env_MASTER_ID    = "MASTER_ID"
-	env_PROXY_URL    = "PROXY_URL"
+	env_NAPCAT_HOST     = "NAPCAT_HOST"
+	env_ACCESS_TOKEN    = "ACCESS_TOKEN"
+	env_XAI_API_KEY     = "XAI_API_KEY"
+	env_MASTER_ID       = "MASTER_ID"
+	env_PROXY_URL       = "PROXY_URL"
+	env_ERIKA_GROK2_KEY = "ERIKA_GROK2_KEY"
 )
 
 func init() {
@@ -55,4 +57,6 @@ func init() {
 			log.Fatalf("Parse %s failed: %s", env_PROXY_URL, proxyURLStr)
 		}
 	}
+
+	ErikaGrok2Key = os.Getenv(env_ERIKA_GROK2_KEY)
 }

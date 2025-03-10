@@ -10,13 +10,11 @@ import (
 
 func getCommandName(s string) string {
 	sliced := false
-	if len(s) > cmds.MaxCommandLength {
-		s = s[:cmds.MaxCommandLength]
+	if len(s) > cmds.MaxCommandLength+1 {
+		s = s[:cmds.MaxCommandLength+1]
 		sliced = true
 	}
-
-	i := strings.IndexAny(s, " \n")
-	if i != -1 {
+	if i := strings.IndexAny(s, " \n"); i != -1 {
 		return s[:i]
 	}
 	if sliced {

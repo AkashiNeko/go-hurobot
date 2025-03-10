@@ -27,9 +27,18 @@ func sendRequest(requestJson string) (result string, err error) {
 		}
 	}
 
-	req, err := http.NewRequest("POST", "https://api.x.ai/v1/chat/completions", bytes.NewBuffer([]byte(requestJson)))
+	requestURL := "https://api.x.ai/v1/chat/completions"
+	if config.ErikaGrok2Key != "" {
+		requestURL = "https://grok.cclvi.cc/v1/chat/completions"
+	}
+
+	req, err := http.NewRequest("POST", requestURL, bytes.NewBuffer([]byte(requestJson)))
 	if err != nil {
 		return "", err
+	}
+
+	if config.ErikaGrok2Key != "" {
+		req.Header.Set("X-Proxy-Key", config.ErikaGrok2Key)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -51,6 +60,47 @@ func sendRequest(requestJson string) (result string, err error) {
 	}
 
 	return "", fmt.Errorf("%s\n\n%s", resp.Status, string(body))
+}
+
+func parseResult(successResult string) string {
+	type Response struct {
+		ID      string `json:"id"`
+		Object  string `json:"object"`
+		Created int64  `json:"created"`
+		Model   string `json:"model"`
+		Choices []struct {
+			Index   int `json:"index"`
+			Message struct {
+				Role    string      `json:"role"`
+				Content string      `json:"content"`
+				Refusal interface{} `json:"refusal"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		} `json:"choices"`
+		Usage struct {
+			PromptTokens        int `json:"prompt_tokens"`
+			CompletionTokens    int `json:"completion_tokens"`
+			ReasoningTokens     int `json:"reasoning_tokens"`
+			TotalTokens         int `json:"total_tokens"`
+			PromptTokensDetails struct {
+				TextTokens   int `json:"text_tokens"`
+				AudioTokens  int `json:"audio_tokens"`
+				ImageTokens  int `json:"image_tokens"`
+				CachedTokens int `json:"cached_tokens"`
+			} `json:"prompt_tokens_details"`
+		} `json:"usage"`
+		SystemFingerprint string `json:"system_fingerprint"`
+	}
+	jsonRet := &Response{}
+	json.Unmarshal([]byte(successResult), jsonRet)
+	return fmt.Sprintf("%s\n\nmodel: %s\nprompt_tokens: %d\ncompletion_tokens: %d\ncreated: %d\nid: %s",
+		jsonRet.Choices[0].Message.Content,
+		jsonRet.Model,
+		jsonRet.Usage.PromptTokens,
+		jsonRet.Usage.CompletionTokens,
+		jsonRet.Created,
+		jsonRet.ID,
+	)
 }
 
 func makeGrokRequest(args []string) string {
@@ -117,44 +167,7 @@ func makeGrokRequest(args []string) string {
 	if err != nil {
 		return err.Error()
 	}
-	type Response struct {
-		ID      string `json:"id"`
-		Object  string `json:"object"`
-		Created int64  `json:"created"`
-		Model   string `json:"model"`
-		Choices []struct {
-			Index   int `json:"index"`
-			Message struct {
-				Role    string      `json:"role"`
-				Content string      `json:"content"`
-				Refusal interface{} `json:"refusal"`
-			} `json:"message"`
-			FinishReason string `json:"finish_reason"`
-		} `json:"choices"`
-		Usage struct {
-			PromptTokens        int `json:"prompt_tokens"`
-			CompletionTokens    int `json:"completion_tokens"`
-			ReasoningTokens     int `json:"reasoning_tokens"`
-			TotalTokens         int `json:"total_tokens"`
-			PromptTokensDetails struct {
-				TextTokens   int `json:"text_tokens"`
-				AudioTokens  int `json:"audio_tokens"`
-				ImageTokens  int `json:"image_tokens"`
-				CachedTokens int `json:"cached_tokens"`
-			} `json:"prompt_tokens_details"`
-		} `json:"usage"`
-		SystemFingerprint string `json:"system_fingerprint"`
-	}
-	jsonRet := &Response{}
-	json.Unmarshal([]byte(ret), jsonRet)
-	return fmt.Sprintf("%s\n\nmodel: %s\nprompt_tokens: %d\ncompletion_tokens: %d\ncreated: %d\nid: %s",
-		jsonRet.Choices[0].Message.Content,
-		jsonRet.Model,
-		jsonRet.Usage.PromptTokens,
-		jsonRet.Usage.CompletionTokens,
-		jsonRet.Created,
-		jsonRet.ID,
-	)
+	return parseResult(ret)
 }
 
 func cmd_grok2(c *qbot.Client, args []string, raw *qbot.Message) {
