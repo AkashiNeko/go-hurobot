@@ -23,7 +23,7 @@ func sendRequest(requestJson string) (result string, err error) {
 	// Use custom proxy
 	if config.ProxyURL.Host != "" {
 		client.Transport = &http.Transport{
-			Proxy: http.ProxyURL(&config.ProxyURL),
+			Proxy: http.ProxyURL(config.ProxyURL),
 		}
 	}
 

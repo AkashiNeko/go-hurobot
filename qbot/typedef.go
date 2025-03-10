@@ -34,6 +34,7 @@ type Message struct {
 	Sender    struct {
 		UserID   uint64 `json:"user_id"`
 		Nickname string `json:"nickname"`
+		Card     string `json:"card"`
 		Role     string `json:"role"`
 	} `json:"sender"`
 	RawMessage string `json:"raw_message"`

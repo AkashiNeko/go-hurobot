@@ -16,9 +16,10 @@ func (c *Client) handleEvents(postType *string, msgStr *[]byte, jsonMap *map[str
 			fallthrough
 		case "group":
 			if c.eventHandlers.onMessage != nil {
-				var msg Message
-				if json.Unmarshal(*msgStr, &msg) == nil {
-					go c.eventHandlers.onMessage(c, &msg)
+				msg := &Message{}
+				if json.Unmarshal(*msgStr, msg) == nil {
+					go saveDatabase(msg)
+					go c.eventHandlers.onMessage(c, msg)
 				}
 			}
 		}
