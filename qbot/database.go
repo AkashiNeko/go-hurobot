@@ -2,18 +2,14 @@ package qbot
 
 import (
 	"errors"
-	"fmt"
-	"go-hurobot/config"
-	"log"
-	"strconv"
 	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-var PsqlConnected bool
+var PsqlDB *gorm.DB = nil
+var PsqlConnected bool = false
 
 type Users struct {
 	UserID   uint64 `gorm:"primaryKey;column:user_id"`
@@ -31,23 +27,18 @@ type Messages struct {
 	Deleted bool      `gorm:"column:deleted"`
 }
 
-func init() {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.PsqlHost, strconv.Itoa(int(config.PsqlPort)), config.PsqlUser, config.PsqlPassword, config.PsqlDbName)
+func initPsqlDB(dsn string) error {
 	var err error
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("gorm.Open: %v", err)
+	if PsqlDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
+		return err
 	}
-	err = db.AutoMigrate(&Users{}, &Messages{})
-	if err != nil {
-		log.Fatalf("db.AutoMigrate: %v", err)
-	}
+	PsqlConnected = true
+	return PsqlDB.AutoMigrate(&Users{}, &Messages{})
 }
 
 func saveDatabase(msg *Message) error {
 	var user Users
-	result := db.First(&user, "user_id = ?", msg.Sender.UserID)
+	result := PsqlDB.First(&user, "user_id = ?", msg.Sender.UserID)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			user = Users{
@@ -55,7 +46,7 @@ func saveDatabase(msg *Message) error {
 				Name:     msg.Sender.Nickname,
 				Nickname: msg.Sender.Card,
 			}
-			if err := db.Create(&user).Error; err != nil {
+			if err := PsqlDB.Create(&user).Error; err != nil {
 				return err
 			}
 		} else {
@@ -64,7 +55,7 @@ func saveDatabase(msg *Message) error {
 	}
 
 	if user.Name != msg.Sender.Nickname {
-		if err := db.Model(&user).Update("name", msg.Sender.Nickname).Error; err != nil {
+		if err := PsqlDB.Model(&user).Update("name", msg.Sender.Nickname).Error; err != nil {
 			return err
 		}
 	}
@@ -77,7 +68,7 @@ func saveDatabase(msg *Message) error {
 		Content: msg.RawMessage,
 		Deleted: false,
 	}
-	if err := db.Create(&newMessage).Error; err != nil {
+	if err := PsqlDB.Create(&newMessage).Error; err != nil {
 		return err
 	}
 	return nil

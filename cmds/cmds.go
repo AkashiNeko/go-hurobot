@@ -1,6 +1,9 @@
 package cmds
 
-import "go-hurobot/qbot"
+import (
+	"go-hurobot/qbot"
+	"strings"
+)
 
 var MaxCommandLength int = 0
 
@@ -13,6 +16,8 @@ func init() {
 		"grok2":        cmd_grok2,
 		"specialtitle": cmd_specialtitle,
 		"sh":           cmd_sh,
+		"psql":         cmd_psql,
+		"group":        cmd_group,
 	}
 
 	for key := range cmdMap {
@@ -27,4 +32,13 @@ func FindCommand(cmd string) func(*qbot.Client, []string, *qbot.Message) {
 		return nil
 	}
 	return cmdMap[cmd]
+}
+
+func decodeSpecialChars(raw string) string {
+	replacer := strings.NewReplacer(
+		"&#91;", "[",
+		"&#93;", "]",
+		"&amp;", "&",
+	)
+	return replacer.Replace(raw)
 }

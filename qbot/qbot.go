@@ -5,11 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
+
+	"go-hurobot/config"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
+
+func init() {
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		config.PsqlHost, strconv.Itoa(int(config.PsqlPort)), config.PsqlUser, config.PsqlPassword, config.PsqlDbName)
+	if err := initPsqlDB(dsn); err != nil {
+		log.Fatalln(err)
+	}
+}
 
 func NewClient(cfg *Config) *Client {
 	client := &Client{
