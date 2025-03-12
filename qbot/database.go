@@ -1,11 +1,11 @@
 package qbot
 
 import (
-	"errors"
 	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var PsqlDB *gorm.DB = nil
@@ -37,39 +37,35 @@ func initPsqlDB(dsn string) error {
 }
 
 func saveDatabase(msg *Message) error {
-	var user Users
-	result := PsqlDB.First(&user, "user_id = ?", msg.Sender.UserID)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			user = Users{
-				UserID:   msg.Sender.UserID,
-				Name:     msg.Sender.Nickname,
-				Nickname: msg.Sender.Card,
-			}
-			if err := PsqlDB.Create(&user).Error; err != nil {
-				return err
-			}
-		} else {
-			return result.Error
+	return PsqlDB.Transaction(func(tx *gorm.DB) error {
+		user := Users{
+			UserID:   msg.Sender.UserID,
+			Name:     msg.Sender.Nickname,
+			Nickname: msg.Sender.Card,
 		}
-	}
 
-	if user.Name != msg.Sender.Nickname {
-		if err := PsqlDB.Model(&user).Update("name", msg.Sender.Nickname).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "user_id"}},
+			DoUpdates: clause.Assignments(
+				map[string]interface{}{
+					"name": gorm.Expr("EXCLUDED.name"),
+				},
+			),
+		}).Where("users.name <> EXCLUDED.name").Create(&user).Error; err != nil {
 			return err
 		}
-	}
 
-	newMessage := Messages{
-		MsgID:   msg.MessageID,
-		UserID:  msg.Sender.UserID,
-		GroupID: msg.GroupID,
-		Time:    time.Unix(int64(msg.Time), 0),
-		Content: msg.RawMessage,
-		Deleted: false,
-	}
-	if err := PsqlDB.Create(&newMessage).Error; err != nil {
-		return err
-	}
-	return nil
+		newMessage := Messages{
+			MsgID:   msg.MessageID,
+			UserID:  msg.Sender.UserID,
+			GroupID: msg.GroupID,
+			Time:    time.Unix(int64(msg.Time), 0),
+			Content: msg.RawMessage,
+			Deleted: false,
+		}
+		if err := tx.Create(&newMessage).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }

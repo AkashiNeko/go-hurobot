@@ -12,6 +12,8 @@ func customReply(c *qbot.Client, msg *qbot.Message) {
 			return
 		} else if strings.Contains(msg.RawMessage, "厉厉害害") {
 			c.SendGroupMsg(msg.GroupID, strings.Replace(msg.RawMessage, "厉厉害害", "可可爱爱", -1), false)
+		} else if strings.Contains(msg.RawMessage, "厉害害") {
+			c.SendGroupMsg(msg.GroupID, strings.Replace(msg.RawMessage, "厉害害", "可爱爱", -1), false)
 		} else if strings.Contains(msg.RawMessage, "厉害") {
 			c.SendGroupMsg(msg.GroupID, strings.Replace(msg.RawMessage, "厉害", "可爱", -1), false)
 		}

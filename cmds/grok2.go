@@ -12,7 +12,27 @@ import (
 	"strconv"
 )
 
-func sendRequest(requestJson string) (result string, err error) {
+type Grok2Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+type Grok2Request struct {
+	Messages    []Grok2Message `json:"messages"`
+	Model       string         `json:"model"`
+	Stream      bool           `json:"stream"`
+	Temperature float64        `json:"temperature"`
+}
+
+func sendRequest(request *Grok2Request) (result string, err error) {
+	if request == nil {
+		return "", errors.New("request is nil")
+	}
+	jsonBytes, err := json.Marshal(request)
+	if err != nil {
+		return "", err
+	}
+	requestJson := string(jsonBytes)
+
 	apiKey := config.XaiApiKey
 	if apiKey == "" {
 		return "", errors.New("no x.ai api key")
@@ -103,39 +123,30 @@ func parseResult(successResult string) string {
 	)
 }
 
-func makeGrokRequest(args []string) string {
+func parseArgs(args []string) string {
 	if len(args) == 0 {
 		return "请输入文本"
 	}
-	type Message struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	}
-	type Request struct {
-		Messages    []Message `json:"messages"`
-		Model       string    `json:"model"`
-		Stream      bool      `json:"stream"`
-		Temperature float64   `json:"temperature"`
-	}
-	request := &Request{}
+
+	request := &Grok2Request{}
 	request.Model = "grok-2-latest"
 	prevArg := ""
 	for _, arg := range args {
 		switch prevArg {
 		case "-s":
-			request.Messages = append(request.Messages, Message{
+			request.Messages = append(request.Messages, Grok2Message{
 				Role:    "system",
 				Content: arg,
 			})
 			prevArg = ""
 		case "-a":
-			request.Messages = append(request.Messages, Message{
+			request.Messages = append(request.Messages, Grok2Message{
 				Role:    "assistant",
 				Content: arg,
 			})
 			prevArg = ""
 		case "-u":
-			request.Messages = append(request.Messages, Message{
+			request.Messages = append(request.Messages, Grok2Message{
 				Role:    "user",
 				Content: arg,
 			})
@@ -159,11 +170,7 @@ func makeGrokRequest(args []string) string {
 	if prevArg != "" {
 		return fmt.Sprintf("不完整的参数：... >>%s<<", prevArg)
 	}
-	jsonBytes, err := json.Marshal(request)
-	if err != nil {
-		return "啊哦！出错了！@氟氟"
-	}
-	ret, err := sendRequest(string(jsonBytes))
+	ret, err := sendRequest(request)
 	if err != nil {
 		return err.Error()
 	}
@@ -182,7 +189,7 @@ func cmd_grok2(c *qbot.Client, args []string, raw *qbot.Message) {
 			c.SendReplyMsg(raw, help)
 			return
 		}
-		c.SendReplyMsg(raw, makeGrokRequest(args[2:]))
+		c.SendReplyMsg(raw, parseArgs(args[2:]))
 	case "help":
 		c.SendReplyMsg(raw, help)
 	default:
