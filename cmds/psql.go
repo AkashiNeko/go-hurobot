@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-func cmd_psql(c *qbot.Client, args []string, raw *qbot.Message) {
+func cmd_psql(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 	if raw.UserID != config.MasterID {
-		c.SendReplyMsg(raw, fmt.Sprintf("%s: Permission denied", args[0]))
+		c.SendReplyMsg(raw, fmt.Sprintf("%s: Permission denied", args.Contents[0]))
 		return
 	}
 
-	rows, err := qbot.PsqlDB.Raw(decodeSpecialChars(strings.Join(args[1:], " "))).Rows()
+	rows, err := qbot.PsqlDB.Raw(decodeSpecialChars(strings.Join(args.Contents[1:], " "))).Rows()
 	if err != nil {
 		c.SendReplyMsg(raw, err.Error())
 		return

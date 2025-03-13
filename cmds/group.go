@@ -6,21 +6,21 @@ import (
 	"strings"
 )
 
-func cmd_group(c *qbot.Client, args []string, raw *qbot.Message) {
+func cmd_group(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 	if raw.GroupID == 0 {
 		c.SendReplyMsg(raw, "只能在群组中使用")
 		return
 	}
 	const help = "Usage: group [rename <group name>]"
-	if len(args) == 1 {
+	if args.Size == 1 {
 		c.SendReplyMsg(raw, help)
 	}
-	switch args[1] {
+	switch args.Contents[1] {
 	case "rename":
-		if len(args) < 3 {
+		if args.Size < 3 {
 			c.SendReplyMsg(raw, help)
 		} else {
-			newName := decodeSpecialChars(strings.Join(args[2:], " "))
+			newName := decodeSpecialChars(strings.Join(args.Contents[2:], " "))
 			c.SendReplyMsg(raw, fmt.Sprintf("重命名群名: %q", newName))
 			c.SetGroupName(raw.GroupID, newName)
 		}

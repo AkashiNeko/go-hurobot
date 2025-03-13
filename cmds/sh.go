@@ -13,18 +13,18 @@ import (
 
 var workingDir string = ""
 
-func cmd_sh(c *qbot.Client, args []string, msg *qbot.Message) {
+func cmd_sh(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 	if msg.UserID != config.MasterID {
-		c.SendReplyMsg(msg, fmt.Sprintf("%s: Permission denied", args[0]))
+		c.SendReplyMsg(msg, fmt.Sprintf("%s: Permission denied", args.Contents[0]))
 		return
 	}
-	if len(args) <= 1 {
+	if args.Size <= 1 {
 		c.SendReplyMsg(msg, "Usage: sh <linux command>")
 		return
 	}
 
-	if strings.HasPrefix(args[1], "cd") {
-		if len(args) > 2 {
+	if strings.HasPrefix(args.Contents[1], "cd") {
+		if args.Size > 2 {
 			absPath, err := exec.Command("realpath", strings.TrimSpace(workingDir)).Output()
 			if err != nil {
 				c.SendReplyMsg(msg, err.Error())
@@ -38,7 +38,7 @@ func cmd_sh(c *qbot.Client, args []string, msg *qbot.Message) {
 		return
 	}
 
-	cmd := exec.Command("bash", "-c", strings.Join(args[1:], " "))
+	cmd := exec.Command("bash", "-c", strings.Join(args.Contents[1:], " "))
 	if workingDir != "" {
 		cmd.Dir = workingDir
 	}
@@ -50,7 +50,7 @@ func cmd_sh(c *qbot.Client, args []string, msg *qbot.Message) {
 		var err error
 		output, err = cmd.CombinedOutput()
 		log.Printf("run command: %s, output: %s, error: %v",
-			strings.Join(args[1:], " "), string(output), err)
+			strings.Join(args.Contents[1:], " "), string(output), err)
 		done <- err
 	}()
 
@@ -64,6 +64,6 @@ func cmd_sh(c *qbot.Client, args []string, msg *qbot.Message) {
 	case <-time.After(30 * time.Second):
 		cmd.Process.Kill()
 		c.SendReplyMsg(msg, fmt.Sprintf("命令执行超时: %s",
-			strings.Join(args[1:], " ")))
+			strings.Join(args.Contents[1:], " ")))
 	}
 }

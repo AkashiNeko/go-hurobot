@@ -4,8 +4,6 @@ import (
 	"go-hurobot/cmds"
 	"go-hurobot/qbot"
 	"strings"
-
-	"github.com/google/shlex"
 )
 
 func getCommandName(s string) string {
@@ -25,8 +23,8 @@ func getCommandName(s string) string {
 
 func onMessage(c *qbot.Client, msg *qbot.Message) {
 	if handler := cmds.FindCommand(getCommandName(msg.Raw)); handler != nil {
-		if args, err := shlex.Split(msg.Raw); err == nil {
-			handler(c, args, msg)
+		if args := cmds.SplitArguments(msg); args != nil {
+			handler(c, msg, args)
 		}
 		return
 	}

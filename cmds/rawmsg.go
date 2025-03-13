@@ -7,24 +7,24 @@ import (
 	"go-hurobot/qbot"
 )
 
-func cmd_rawmsg(c *qbot.Client, args []string, raw *qbot.Message) {
-	if len(args) >= 2 && (args[1] == "-f" || args[1] == "--format") {
-		if len(args) >= 3 {
-			switch args[2] {
+func cmd_rawmsg(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
+	if args.Size >= 2 && (args.Contents[1] == "-f" || args.Contents[1] == "--format") {
+		if args.Size >= 3 {
+			switch args.Contents[2] {
 			case "json": // default
 			case "%v":
 				fallthrough
 			case "%+v":
 				fallthrough
 			case "%#v":
-				c.SendReplyMsg(raw, fmt.Sprintf(args[2], raw))
+				c.SendReplyMsg(raw, fmt.Sprintf(args.Contents[2], raw))
 				return
 			default:
-				c.SendReplyMsg(raw, fmt.Sprintf("Unknown format %q", args[2]))
+				c.SendReplyMsg(raw, fmt.Sprintf("Unknown format %q", args.Contents[2]))
 				return
 			}
 		} else {
-			c.SendReplyMsg(raw, fmt.Sprintf("Usage: %s [-f|--format format]", args[0]))
+			c.SendReplyMsg(raw, fmt.Sprintf("Usage: %s [-f|--format format]", args.Contents[0]))
 			return
 		}
 	}

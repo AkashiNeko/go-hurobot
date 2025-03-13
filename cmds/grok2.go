@@ -177,22 +177,22 @@ func parseArgs(args []string) string {
 	return parseResult(ret)
 }
 
-func cmd_grok2(c *qbot.Client, args []string, raw *qbot.Message) {
+func cmd_grok2(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 	const help = "Usage: grok2 <option> [-s <system content>] [-a <assistant content>] [-u <user content>] [-m <model>] [-t <temperature>]"
-	if len(args) == 1 {
+	if args.Size == 1 {
 		c.SendReplyMsg(raw, help)
 		return
 	}
-	switch args[1] {
+	switch args.Contents[1] {
 	case "debug":
-		if len(args) < 4 {
+		if args.Size < 4 {
 			c.SendReplyMsg(raw, help)
 			return
 		}
-		c.SendReplyMsg(raw, parseArgs(args[2:]))
+		c.SendReplyMsg(raw, parseArgs(args.Contents[2:]))
 	case "help":
 		c.SendReplyMsg(raw, help)
 	default:
-		c.SendReplyMsg(raw, fmt.Sprintf("不能理解参数：grok2 >>%s<<\n发送 grok2 help 查看帮助", args[1]))
+		c.SendReplyMsg(raw, fmt.Sprintf("不能理解参数：grok2 >>%s<<\n发送 grok2 help 查看帮助", args.Contents[1]))
 	}
 }
