@@ -39,9 +39,9 @@ func initPsqlDB(dsn string) error {
 func saveDatabase(msg *Message) error {
 	return PsqlDB.Transaction(func(tx *gorm.DB) error {
 		user := Users{
-			UserID:   msg.Sender.UserID,
-			Name:     msg.Sender.Nickname,
-			Nickname: msg.Sender.Card,
+			UserID:   msg.UserID,
+			Name:     msg.Nickname,
+			Nickname: msg.Card,
 		}
 
 		if err := tx.Clauses(clause.OnConflict{
@@ -56,11 +56,11 @@ func saveDatabase(msg *Message) error {
 		}
 
 		newMessage := Messages{
-			MsgID:   msg.MessageID,
-			UserID:  msg.Sender.UserID,
+			MsgID:   msg.MsgID,
+			UserID:  msg.UserID,
 			GroupID: msg.GroupID,
 			Time:    time.Unix(int64(msg.Time), 0),
-			Content: msg.RawMessage,
+			Content: msg.Raw,
 			Deleted: false,
 		}
 		if err := tx.Create(&newMessage).Error; err != nil {

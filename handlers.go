@@ -24,8 +24,8 @@ func getCommandName(s string) string {
 }
 
 func onMessage(c *qbot.Client, msg *qbot.Message) {
-	if handler := cmds.FindCommand(getCommandName(msg.RawMessage)); handler != nil {
-		if args, err := shlex.Split(msg.RawMessage); err == nil {
+	if handler := cmds.FindCommand(getCommandName(msg.Raw)); handler != nil {
+		if args, err := shlex.Split(msg.Raw); err == nil {
 			handler(c, args, msg)
 		}
 		return

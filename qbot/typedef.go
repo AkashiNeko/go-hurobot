@@ -27,7 +27,39 @@ type Client struct {
 	}
 }
 
+type MsgType int
+
+const (
+	Text    MsgType = 0
+	Image   MsgType = 1
+	Record  MsgType = 2
+	At      MsgType = 3
+	Reply   MsgType = 4
+	File    MsgType = 5
+	Forward MsgType = 6
+	Json    MsgType = 7
+
+	Other MsgType = -1
+)
+
+type MsgItem struct {
+	Type    MsgType
+	Content string
+}
+
 type Message struct {
+	GroupID  uint64
+	UserID   uint64
+	Nickname string
+	Card     string
+	Role     string
+	Time     uint64
+	MsgID    uint64
+	Raw      string
+	Array    []MsgItem
+}
+
+type messageJson struct {
 	GroupID   uint64 `json:"group_id"`
 	Time      uint64 `json:"time"`
 	MessageID uint64 `json:"message_id"`

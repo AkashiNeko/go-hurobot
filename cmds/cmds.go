@@ -2,15 +2,18 @@ package cmds
 
 import (
 	"go-hurobot/qbot"
+	"strconv"
 	"strings"
 )
 
 var MaxCommandLength int = 0
 
-var cmdMap map[string]func(*qbot.Client, []string, *qbot.Message)
+type CmdHandler func(*qbot.Client, []string, *qbot.Message)
+
+var cmdMap map[string]CmdHandler
 
 func init() {
-	cmdMap = map[string]func(*qbot.Client, []string, *qbot.Message){
+	cmdMap = map[string]CmdHandler{
 		"echo":         cmd_echo,
 		"rawmsg":       cmd_rawmsg,
 		"grok2":        cmd_grok2,
@@ -41,4 +44,12 @@ func decodeSpecialChars(raw string) string {
 		"&amp;", "&",
 	)
 	return replacer.Replace(raw)
+}
+
+func str2uin64(s string) uint64 {
+	value, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return value
 }

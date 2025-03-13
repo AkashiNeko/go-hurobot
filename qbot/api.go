@@ -77,10 +77,10 @@ func (c *Client) SetGroupAdmin(groupID uint64, userID uint64, enable bool) error
 	return err
 }
 
-func (c *Client) SendReplyMsg(raw *Message, message string) {
-	if raw.GroupID == 0 {
-		c.SendPrivateMsg(raw.Sender.UserID, message, false)
+func (c *Client) SendReplyMsg(msg *Message, message string) {
+	if msg.GroupID == 0 {
+		c.SendPrivateMsg(msg.UserID, message, false)
 	} else {
-		c.SendGroupMsg(raw.GroupID, message, false)
+		c.SendGroupMsg(msg.GroupID, message, false)
 	}
 }

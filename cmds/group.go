@@ -25,12 +25,10 @@ func cmd_group(c *qbot.Client, args []string, raw *qbot.Message) {
 			c.SetGroupName(raw.GroupID, newName)
 		}
 	case "op":
-		// if len(args) < 3 {
-		// }
-		c.SendReplyMsg(raw, fmt.Sprintf("已将 %s 设为 WTF 管理员。", raw.Sender.Card))
-		c.SetGroupAdmin(raw.GroupID, raw.Sender.UserID, true)
+		c.SendReplyMsg(raw, fmt.Sprintf("已将 %s 设为 WTF 管理员。", raw.Card))
+		c.SetGroupAdmin(raw.GroupID, raw.UserID, true)
 	case "deop":
-		c.SendReplyMsg(raw, fmt.Sprintf("已取消 %s 的 WTF 管理员身份。", raw.Sender.Card))
-		c.SetGroupAdmin(raw.GroupID, raw.Sender.UserID, false)
+		c.SendReplyMsg(raw, fmt.Sprintf("已取消 %s 的 WTF 管理员身份。", raw.Card))
+		c.SetGroupAdmin(raw.GroupID, raw.UserID, false)
 	}
 }

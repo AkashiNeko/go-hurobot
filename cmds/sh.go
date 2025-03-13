@@ -13,13 +13,13 @@ import (
 
 var workingDir string = ""
 
-func cmd_sh(c *qbot.Client, args []string, raw *qbot.Message) {
-	if raw.Sender.UserID != config.MasterID {
-		c.SendReplyMsg(raw, fmt.Sprintf("%s: Permission denied", args[0]))
+func cmd_sh(c *qbot.Client, args []string, msg *qbot.Message) {
+	if msg.UserID != config.MasterID {
+		c.SendReplyMsg(msg, fmt.Sprintf("%s: Permission denied", args[0]))
 		return
 	}
 	if len(args) <= 1 {
-		c.SendReplyMsg(raw, "Usage: sh <linux command>")
+		c.SendReplyMsg(msg, "Usage: sh <linux command>")
 		return
 	}
 
@@ -27,14 +27,14 @@ func cmd_sh(c *qbot.Client, args []string, raw *qbot.Message) {
 		if len(args) > 2 {
 			absPath, err := exec.Command("realpath", strings.TrimSpace(workingDir)).Output()
 			if err != nil {
-				c.SendReplyMsg(raw, err.Error())
+				c.SendReplyMsg(msg, err.Error())
 				return
 			}
 			workingDir = string(absPath)
 		} else {
 			workingDir = os.Getenv("HOME")
 		}
-		c.SendReplyMsg(raw, workingDir)
+		c.SendReplyMsg(msg, workingDir)
 		return
 	}
 
@@ -57,13 +57,13 @@ func cmd_sh(c *qbot.Client, args []string, raw *qbot.Message) {
 	select {
 	case err := <-done:
 		if err != nil {
-			c.SendReplyMsg(raw, fmt.Sprintf("%v\n%s", err, string(output)))
+			c.SendReplyMsg(msg, fmt.Sprintf("%v\n%s", err, string(output)))
 			return
 		}
-		c.SendReplyMsg(raw, string(output))
+		c.SendReplyMsg(msg, string(output))
 	case <-time.After(30 * time.Second):
 		cmd.Process.Kill()
-		c.SendReplyMsg(raw, fmt.Sprintf("命令执行超时: %s",
+		c.SendReplyMsg(msg, fmt.Sprintf("命令执行超时: %s",
 			strings.Join(args[1:], " ")))
 	}
 }

@@ -5,6 +5,6 @@ import (
 	"strings"
 )
 
-func cmd_echo(c *qbot.Client, args []string, raw *qbot.Message) {
-	c.SendReplyMsg(raw, strings.Join(args[1:], " "))
+func cmd_echo(c *qbot.Client, args []string, msg *qbot.Message) {
+	c.SendReplyMsg(msg, strings.Trim(msg.Raw[4:], " \n"))
 }

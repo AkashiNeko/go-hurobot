@@ -9,7 +9,7 @@ import (
 )
 
 func cmd_psql(c *qbot.Client, args []string, raw *qbot.Message) {
-	if raw.Sender.UserID != config.MasterID {
+	if raw.UserID != config.MasterID {
 		c.SendReplyMsg(raw, fmt.Sprintf("%s: Permission denied", args[0]))
 		return
 	}
