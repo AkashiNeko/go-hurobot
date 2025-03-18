@@ -8,7 +8,7 @@ import (
 	"github.com/google/shlex"
 )
 
-var MaxCommandLength int = 0
+var maxCommandLength int = 0
 
 type ArgsList struct {
 	Contents []string
@@ -32,19 +32,53 @@ func init() {
 	}
 
 	for key := range cmdMap {
-		if len(key) > MaxCommandLength {
-			MaxCommandLength = len(key)
+		if len(key) > maxCommandLength {
+			maxCommandLength = len(key)
 		}
 	}
 }
 
-func SplitArguments(msg *qbot.Message) *ArgsList {
+func HandleCommand(c *qbot.Client, msg *qbot.Message) {
+	skip := 0
+	if msg.Array[0].Type == qbot.Reply {
+		skip++
+		if len(msg.Array) != 1 && msg.Array[1].Type == qbot.At {
+			skip++
+		}
+	} else if msg.Array[0].Type == qbot.At {
+		skip++
+	}
+
+	if skip != 0 {
+		if p := findNthClosingBracket(msg.Raw, skip); p != len(msg.Raw) {
+			msg.Raw = msg.Raw[p:]
+		} else {
+			return
+		}
+	}
+	if handler := findCommand(getCommandName(msg.Raw)); handler != nil {
+		if args := splitArguments(msg, skip); args != nil {
+			handler(c, msg, args)
+		}
+	}
+}
+
+func splitArguments(msg *qbot.Message, skip int) *ArgsList {
 	result := &ArgsList{
 		Contents: make([]string, 0, 20),
 		Types:    make([]qbot.MsgType, 0, 20),
 		Size:     0,
 	}
-	for _, item := range msg.Array {
+
+	if skip < 0 {
+		skip = 0
+	}
+
+	if skip >= len(msg.Array) {
+		return result
+	}
+
+	for _, item := range msg.Array[skip:] {
 		if item.Type == qbot.Text {
 			texts, err := shlex.Split(item.Content)
 			if err != nil {
@@ -62,11 +96,43 @@ func SplitArguments(msg *qbot.Message) *ArgsList {
 	return result
 }
 
-func FindCommand(cmd string) CmdHandler {
+func findNthClosingBracket(s string, n int) int {
+	count := 0
+	for i, char := range s {
+		if char == ']' {
+			count++
+			if count == n {
+				i++
+				for i < len(s) && s[i] == ' ' {
+					i++
+				}
+				return i
+			}
+		}
+	}
+	return 0
+}
+
+func findCommand(cmd string) CmdHandler {
 	if cmd == "" {
 		return nil
 	}
 	return cmdMap[cmd]
+}
+
+func getCommandName(s string) string {
+	sliced := false
+	if len(s) > maxCommandLength+1 {
+		s = s[:maxCommandLength+1]
+		sliced = true
+	}
+	if i := strings.IndexAny(s, " \n"); i != -1 {
+		return s[:i]
+	}
+	if sliced {
+		return ""
+	}
+	return s
 }
 
 func decodeSpecialChars(raw string) string {
@@ -74,6 +140,15 @@ func decodeSpecialChars(raw string) string {
 		"&#91;", "[",
 		"&#93;", "]",
 		"&amp;", "&",
+	)
+	return replacer.Replace(raw)
+}
+
+func encodeSpecialChars(raw string) string {
+	replacer := strings.NewReplacer(
+		"[", "&#91;",
+		"]", "&#93;",
+		"&", "&amp;",
 	)
 	return replacer.Replace(raw)
 }

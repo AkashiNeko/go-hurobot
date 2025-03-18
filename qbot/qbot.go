@@ -22,9 +22,14 @@ func init() {
 	}
 }
 
-func NewClient(cfg *Config) *Client {
+func NewClient() *Client {
 	client := &Client{
-		config:     cfg,
+		config: &Config{
+			Address:      config.NapcatWSURL,
+			Reconnect:    3 * time.Second,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		},
 		retryCount: 0,
 		stopChan:   make(chan bool),
 	}

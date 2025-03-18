@@ -12,6 +12,7 @@ var (
 	XaiApiKey     string
 	NapcatWSURL   string
 	MasterID      uint64
+	BotID         uint64
 	ProxyURL      *url.URL
 	ErikaGrok2Key string
 
@@ -28,6 +29,7 @@ const (
 	env_ACCESS_TOKEN    = "ACCESS_TOKEN"
 	env_XAI_API_KEY     = "XAI_API_KEY"
 	env_MASTER_ID       = "MASTER_ID"
+	env_BOT_ID          = "BOT_ID"
 	env_PROXY_URL       = "PROXY_URL"
 	env_ERIKA_GROK2_KEY = "ERIKA_GROK2_KEY"
 

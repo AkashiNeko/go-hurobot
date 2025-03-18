@@ -10,20 +10,20 @@ import (
 
 func cmd_psql(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 	if raw.UserID != config.MasterID {
-		c.SendReplyMsg(raw, fmt.Sprintf("%s: Permission denied", args.Contents[0]))
+		c.SendMsg(raw, fmt.Sprintf("%s: Permission denied", args.Contents[0]))
 		return
 	}
 
 	rows, err := qbot.PsqlDB.Raw(decodeSpecialChars(strings.Join(args.Contents[1:], " "))).Rows()
 	if err != nil {
-		c.SendReplyMsg(raw, err.Error())
+		c.SendMsg(raw, err.Error())
 		return
 	}
 	defer rows.Close()
 
 	columns, err := rows.Columns()
 	if err != nil {
-		c.SendReplyMsg(raw, err.Error())
+		c.SendMsg(raw, err.Error())
 		return
 	}
 
@@ -41,7 +41,7 @@ func cmd_psql(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 		}
 
 		if err := rows.Scan(values...); err != nil {
-			c.SendReplyMsg(raw, err.Error())
+			c.SendMsg(raw, err.Error())
 			return
 		}
 
@@ -58,10 +58,10 @@ func cmd_psql(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 		count++
 	}
 	if err = rows.Err(); err != nil {
-		c.SendReplyMsg(raw, err.Error())
+		c.SendMsg(raw, err.Error())
 	} else if result == "" {
-		c.SendReplyMsg(raw, "[]")
+		c.SendMsg(raw, "[]")
 	} else {
-		c.SendReplyMsg(raw, result)
+		c.SendMsg(raw, result)
 	}
 }

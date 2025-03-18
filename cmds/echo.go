@@ -6,5 +6,5 @@ import (
 )
 
 func cmd_echo(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
-	c.SendReplyMsg(msg, strings.Trim(msg.Raw[4:], " \n"))
+	c.SendMsg(msg, strings.Trim(msg.Raw[4:], " \n"))
 }

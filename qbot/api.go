@@ -78,6 +78,10 @@ func (c *Client) SetGroupAdmin(groupID uint64, userID uint64, enable bool) error
 }
 
 func (c *Client) SendReplyMsg(msg *Message, message string) {
+	c.SendMsg(msg, CQReply(msg.MsgID)+message)
+}
+
+func (c *Client) SendMsg(msg *Message, message string) {
 	if msg.GroupID == 0 {
 		c.SendPrivateMsg(msg.UserID, message, false)
 	} else {
