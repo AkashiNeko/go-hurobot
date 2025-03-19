@@ -57,7 +57,9 @@ func HandleCommand(c *qbot.Client, msg *qbot.Message) {
 			return
 		}
 	}
-	if handler := findCommand(getCommandName(msg.Raw)); handler != nil {
+	handler := findCommand(getCommandName(msg.Raw))
+	go qbot.SaveDatabase(msg, handler != nil)
+	if handler != nil {
 		if args := splitArguments(msg, skip); args != nil {
 			handler(c, msg, args)
 		}

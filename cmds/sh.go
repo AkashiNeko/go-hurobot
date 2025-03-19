@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"fmt"
+	"go-hurobot/config"
 	"go-hurobot/qbot"
 	"log"
 	"os/exec"
@@ -12,6 +13,7 @@ import (
 var workingDir string = "/home/qwq"
 
 func truncateString(s string) string {
+	s = encodeSpecialChars(s)
 	const (
 		maxLines    = 10
 		maxChars    = 500
@@ -22,7 +24,7 @@ func truncateString(s string) string {
 
 	if lineCount >= 11 {
 		index := 0
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			index = strings.Index(s[index:], "\n") + 1 + index
 			if index == 0 {
 				return s
@@ -39,7 +41,7 @@ func truncateString(s string) string {
 }
 
 func cmd_sh(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
-	if msg.GroupID == 0 {
+	if msg.GroupID == 0 && msg.UserID != config.MasterID {
 		c.SendReplyMsg(msg, "请在群内使用")
 		return
 	}
@@ -83,14 +85,15 @@ func cmd_sh(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 
 	select {
 	case err := <-done:
-		if err != nil {
-			c.SendReplyMsg(msg, fmt.Sprintf("%v\n%s", err, string(output)))
-			return
+		if err == nil {
+			// success
+			c.SendReplyMsg(msg, truncateString(string(output)))
+		} else {
+			// failed
+			c.SendReplyMsg(msg, fmt.Sprintf("%v\n%s", err, truncateString(string(output))))
 		}
-		c.SendReplyMsg(msg, truncateString(string(output)))
 	case <-time.After(300 * time.Second):
 		cmd.Process.Kill()
-		c.SendReplyMsg(msg, fmt.Sprintf("命令执行超时: %s",
-			strings.Join(args.Contents[1:], " ")))
+		c.SendReplyMsg(msg, fmt.Sprintf("Timeout: %q", rawcmd))
 	}
 }

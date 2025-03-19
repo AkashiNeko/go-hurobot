@@ -15,7 +15,7 @@ type Users struct {
 	UserID   uint64 `gorm:"primaryKey;column:user_id"`
 	Name     string `gorm:"not null;column:name"`
 	Nickname string `gorm:"column:nick_name"`
-	Gender   bool   `gorm:"column:gender"`
+	Summary  string `gorm:"column:summary"`
 }
 
 type Messages struct {
@@ -23,8 +23,10 @@ type Messages struct {
 	UserID  uint64    `gorm:"not null;column:user_id"`
 	GroupID uint64    `gorm:"not null;column:group_id"`
 	Content string    `gorm:"not null;column:content"`
-	Time    time.Time `gorm:"not null;column:time"`
+	Raw     string    `gorm:"not null;column:raw"`
 	Deleted bool      `gorm:"column:deleted"`
+	IsCmd   bool      `gorm:"column:is_cmd"`
+	Time    time.Time `gorm:"not null;column:time"`
 }
 
 func initPsqlDB(dsn string) error {
@@ -36,7 +38,7 @@ func initPsqlDB(dsn string) error {
 	return PsqlDB.AutoMigrate(&Users{}, &Messages{})
 }
 
-func saveDatabase(msg *Message) error {
+func SaveDatabase(msg *Message, isCmd bool) error {
 	return PsqlDB.Transaction(func(tx *gorm.DB) error {
 		user := Users{
 			UserID:   msg.UserID,
@@ -47,21 +49,22 @@ func saveDatabase(msg *Message) error {
 		if err := tx.Clauses(clause.OnConflict{
 			Columns: []clause.Column{{Name: "user_id"}},
 			DoUpdates: clause.Assignments(
-				map[string]interface{}{
+				map[string]any{
 					"name": gorm.Expr("EXCLUDED.name"),
 				},
 			),
 		}).Where("users.name <> EXCLUDED.name").Create(&user).Error; err != nil {
 			return err
 		}
-
 		newMessage := Messages{
 			MsgID:   msg.MsgID,
 			UserID:  msg.UserID,
 			GroupID: msg.GroupID,
-			Time:    time.Unix(int64(msg.Time), 0),
-			Content: msg.Raw,
+			Content: msg.Content,
+			Raw:     msg.Raw,
 			Deleted: false,
+			IsCmd:   isCmd,
+			Time:    time.Unix(int64(msg.Time), 0),
 		}
 		if err := tx.Create(&newMessage).Error; err != nil {
 			return err

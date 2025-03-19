@@ -31,13 +31,14 @@ type MsgType int
 
 const (
 	Text    MsgType = 0
-	Image   MsgType = 1
-	Record  MsgType = 2
-	At      MsgType = 3
-	Reply   MsgType = 4
-	File    MsgType = 5
-	Forward MsgType = 6
-	Json    MsgType = 7
+	At      MsgType = 1
+	Face    MsgType = 2
+	Image   MsgType = 3
+	Record  MsgType = 4
+	Reply   MsgType = 5
+	File    MsgType = 6
+	Forward MsgType = 7
+	Json    MsgType = 8
 
 	Other MsgType = -1
 )
@@ -56,6 +57,7 @@ type Message struct {
 	Time     uint64
 	MsgID    uint64
 	Raw      string
+	Content  string
 	Array    []MsgItem
 }
 

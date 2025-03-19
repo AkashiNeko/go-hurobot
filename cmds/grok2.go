@@ -123,7 +123,7 @@ func parseResult(successResult string) string {
 	)
 }
 
-func parseArgs(args []string) string {
+func callGrok2(args []string) string {
 	if len(args) == 0 {
 		return "请输入文本"
 	}
@@ -189,7 +189,7 @@ func cmd_grok2(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 			c.SendReplyMsg(raw, help)
 			return
 		}
-		c.SendReplyMsg(raw, parseArgs(args.Contents[2:]))
+		c.SendReplyMsg(raw, callGrok2(args.Contents[2:]))
 	case "help":
 		c.SendReplyMsg(raw, help)
 	default:
