@@ -29,6 +29,7 @@ func init() {
 		"sh":           cmd_sh,
 		"psql":         cmd_psql,
 		"group":        cmd_group,
+		"delete":       cmd_delete,
 	}
 
 	for key := range cmdMap {

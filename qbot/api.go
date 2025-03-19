@@ -77,6 +77,17 @@ func (c *Client) SetGroupAdmin(groupID uint64, userID uint64, enable bool) error
 	return err
 }
 
+func (c *Client) DeleteMsg(msgID uint64) error {
+	req := cqRequest{
+		Action: "delete_msg",
+		Params: map[string]any{
+			"message_id": msgID,
+		},
+	}
+	err := c.sendJson(&req)
+	return err
+}
+
 func (c *Client) SendReplyMsg(msg *Message, message string) {
 	c.SendMsg(msg, CQReply(msg.MsgID)+message)
 }
