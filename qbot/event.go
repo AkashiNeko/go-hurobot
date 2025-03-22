@@ -132,7 +132,7 @@ func (c *Client) handleEvents(postType *string, msgStr *[]byte, jsonMap *map[str
 					return
 				}
 				if msg := parseMsgJson(msgJson); msg != nil {
-					go c.eventHandlers.onMessage(c, msg)
+					c.eventHandlers.onMessage(c, msg)
 				}
 			}
 		}

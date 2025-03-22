@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"go-hurobot/config"
-
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+
+	"go-hurobot/config"
 )
 
 func init() {
@@ -120,7 +120,7 @@ func (c *Client) messageHandler() {
 		} else if postType, exists := jsonMap["post_type"]; exists {
 			// Server-initiated push
 			if str, ok := postType.(string); ok && str != "" {
-				c.handleEvents(&str, &msg, &jsonMap)
+				go c.handleEvents(&str, &msg, &jsonMap)
 			}
 		}
 	}

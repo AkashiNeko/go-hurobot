@@ -1,11 +1,12 @@
 package cmds
 
 import (
-	"go-hurobot/qbot"
 	"strconv"
 	"strings"
 
 	"github.com/google/shlex"
+
+	"go-hurobot/qbot"
 )
 
 var maxCommandLength int = 0
@@ -39,7 +40,7 @@ func init() {
 	}
 }
 
-func HandleCommand(c *qbot.Client, msg *qbot.Message) {
+func HandleCommand(c *qbot.Client, msg *qbot.Message) bool {
 	skip := 0
 	if msg.Array[0].Type == qbot.Reply {
 		skip++
@@ -50,20 +51,25 @@ func HandleCommand(c *qbot.Client, msg *qbot.Message) {
 		skip++
 	}
 
+	var raw string
 	if skip != 0 {
 		if p := findNthClosingBracket(msg.Raw, skip); p != len(msg.Raw) {
+			raw = msg.Raw
 			msg.Raw = msg.Raw[p:]
 		} else {
-			return
+			return false
 		}
 	}
 	handler := findCommand(getCommandName(msg.Raw))
-	go qbot.SaveDatabase(msg, handler != nil)
 	if handler != nil {
 		if args := splitArguments(msg, skip); args != nil {
 			handler(c, msg, args)
 		}
 	}
+	if raw != "" {
+		msg.Raw = raw
+	}
+	return handler != nil
 }
 
 func splitArguments(msg *qbot.Message, skip int) *ArgsList {
