@@ -94,6 +94,7 @@ func init() {
 	}
 
 	MasterID = getEnvUInt(env_MASTER_ID, 1006554341)
+	BotID = getEnvUInt(env_BOT_ID, 3552586437)
 	ProxyURL = getEnvUrl(env_PROXY_URL)
 	ErikaGrok2Key = os.Getenv(env_ERIKA_GROK2_KEY)
 	PsqlHost = getEnvString(env_PSQL_HOST, "127.0.0.1")
