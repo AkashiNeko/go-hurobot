@@ -32,6 +32,7 @@ func init() {
 		"group":        cmd_group,
 		"delete":       cmd_delete,
 		"llm":          cmd_llm,
+		"callme":       cmd_callme,
 	}
 
 	for key := range cmdMap {
