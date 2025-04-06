@@ -13,3 +13,7 @@ func CQReply(msgId uint64) string {
 func CQPoke(userId uint64) string {
 	return fmt.Sprintf("[CQ:poke,qq=%d]", userId)
 }
+
+func CQRecord(text string) string {
+	return fmt.Sprintf("[CQ:record,file=https://akashi.top/tts-file-cache/%s]", text)
+}

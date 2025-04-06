@@ -34,6 +34,7 @@ func init() {
 		"llm":          cmd_llm,
 		"callme":       cmd_callme,
 		"debug":        cmd_debug,
+		"tts":          cmd_tts,
 	}
 
 	for key := range cmdMap {

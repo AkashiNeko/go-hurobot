@@ -88,6 +88,10 @@ func (c *Client) DeleteMsg(msgID uint64) error {
 	return err
 }
 
+func (c *Client) SendRecord(msg *Message, file string) {
+	c.SendMsg(msg, CQRecord(file))
+}
+
 func (c *Client) SendReplyMsg(msg *Message, message string) {
 	c.SendMsg(msg, CQReply(msg.MsgID)+message)
 }
