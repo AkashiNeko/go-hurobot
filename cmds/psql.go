@@ -14,7 +14,7 @@ func cmd_psql(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 		return
 	}
 
-	rows, err := qbot.PsqlDB.Raw(decodeSpecialChars(strings.Join(args.Contents[1:], " "))).Rows()
+	rows, err := qbot.PsqlDB.Raw(decodeSpecialChars(raw.Raw[5:])).Rows()
 	if err != nil {
 		c.SendMsg(raw, err.Error())
 		return

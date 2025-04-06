@@ -18,6 +18,7 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 		Prompt     string
 		MaxHistory int
 		Enabled    bool
+		Debug      bool
 	}
 
 	err := qbot.PsqlDB.Table("group_llm_configs").
@@ -29,23 +30,26 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			Prompt     string
 			MaxHistory int
 			Enabled    bool
+			Debug      bool
 		}{
 			Prompt:     "你是一个群聊机器人，请你陪伴群友们聊天，注意请不要使用Markdown语法。",
 			MaxHistory: 200,
 			Enabled:    true,
+			Debug:      false,
 		}
 		qbot.PsqlDB.Table("group_llm_configs").Create(map[string]any{
 			"group_id":    msg.GroupID,
 			"prompt":      llmConfig.Prompt,
 			"max_history": llmConfig.MaxHistory,
 			"enabled":     llmConfig.Enabled,
+			"debug":       llmConfig.Debug,
 		})
 	}
 
 	switch args.Contents[1] {
 	case "prompt":
 		if args.Size == 2 {
-			c.SendMsg(msg, fmt.Sprintf("当前提示词: %s", llmConfig.Prompt))
+			c.SendMsg(msg, fmt.Sprintf("prompt: %s", llmConfig.Prompt))
 		} else {
 			newPrompt := strings.Join(args.Contents[2:], " ")
 			err := qbot.PsqlDB.Table("group_llm_configs").
@@ -111,6 +115,48 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			llmConfig.MaxHistory,
 			llmConfig.Prompt)
 		c.SendMsg(msg, status)
+
+	case "tokens":
+		var user qbot.Users
+		if args.Size == 2 {
+			// 查看自己的 token 使用量
+			err := qbot.PsqlDB.Where("user_id = ?", msg.UserID).First(&user).Error
+			if err != nil {
+				c.SendMsg(msg, "获取 token 使用量失败")
+				return
+			}
+			c.SendMsg(msg, fmt.Sprintf("你的 token 使用量：%d", user.TokenUsage))
+		} else if args.Size == 3 && args.Types[2] == qbot.At {
+			// 查看其他人的 token 使用量
+			targetID := str2uin64(args.Contents[2])
+			err := qbot.PsqlDB.Where("user_id = ?", targetID).First(&user).Error
+			if err != nil {
+				c.SendMsg(msg, "获取 token 使用量失败")
+				return
+			}
+			c.SendMsg(msg, fmt.Sprintf("用户 %s 的 token 使用量：%d", args.Contents[2], user.TokenUsage))
+		} else {
+			c.SendMsg(msg, "Usage:\nllm tokens\nllm tokens @user")
+		}
+
+	case "debug":
+		if args.Size == 2 {
+			c.SendMsg(msg, fmt.Sprintf("debug: %v", llmConfig.Debug))
+		} else {
+			debugValue := strings.ToLower(args.Contents[2])
+			if debugValue != "on" && debugValue != "off" {
+				return
+			}
+			newDebug := debugValue == "on"
+			err := qbot.PsqlDB.Table("group_llm_configs").
+				Where("group_id = ?", msg.GroupID).
+				Update("debug", newDebug).Error
+			if err != nil {
+				c.SendMsg(msg, err.Error())
+			} else {
+				c.SendMsg(msg, fmt.Sprintf("debug = %v", newDebug))
+			}
+		}
 
 	default:
 		c.SendMsg(msg, fmt.Sprintf("不能理解的参数 >>%s<<", args.Contents[1]))

@@ -12,10 +12,11 @@ var PsqlDB *gorm.DB = nil
 var PsqlConnected bool = false
 
 type Users struct {
-	UserID   uint64 `gorm:"primaryKey;column:user_id"`
-	Name     string `gorm:"not null;column:name"`
-	Nickname string `gorm:"column:nick_name"`
-	Summary  string `gorm:"column:summary"`
+	UserID     uint64 `gorm:"primaryKey;column:user_id"`
+	Name       string `gorm:"not null;column:name"`
+	Nickname   string `gorm:"column:nick_name"`
+	Summary    string `gorm:"column:summary"`
+	TokenUsage uint64 `gorm:"column:token_usage"`
 }
 
 type Messages struct {

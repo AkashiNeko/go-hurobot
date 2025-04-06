@@ -1,8 +1,9 @@
 CREATE TABLE users (
-    "user_id"   BIGINT NOT NULL,
-    "name"      TEXT NOT NULL,
-    "nick_name" TEXT,
-    "summary"   TEXT,
+    "user_id"     BIGINT NOT NULL,
+    "name"        TEXT NOT NULL,
+    "nick_name"   TEXT,
+    "summary"     TEXT,
+    "token_usage" BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY ("user_id")
 );
 
@@ -22,7 +23,9 @@ CREATE TABLE messages (
 CREATE TABLE group_llm_configs (
     "group_id"    BIGINT  NOT NULL,
     "prompt"      TEXT    NOT NULL,
-    "max_history" INTEGER NOT NULL DEFAULT 200,
+    "max_history" INTEGER NOT NULL DEFAULT 100,
     "enabled"     BOOLEAN NOT NULL DEFAULT TRUE,
+    "info"        TEXT,
+    "debug"       BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY ("group_id")
 );
