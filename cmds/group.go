@@ -7,8 +7,7 @@ import (
 )
 
 func cmd_group(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
-	if raw.GroupID == 0 {
-		c.SendMsg(raw, "只能在群组中使用")
+	if raw.GroupID != 948697448 {
 		return
 	}
 	const help = "Usage: group [rename <group name>]"

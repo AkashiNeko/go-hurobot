@@ -28,6 +28,9 @@ func LLMMsgHandle(c *qbot.Client, msg *qbot.Message) bool {
 2. 群聊不支持 Markdown 语法，所以请不要使用它。
 3. 使用灵活生动的语言，不要让你发的消息读起来像是AI生成的。
 4. 每个用户有一个id、昵称和个人信息。你可以在回复时使用昵称来称呼用户，尽量避免在回复中使用id。
+5. 目前你只能阅读文字和发送文字，无法识别图片、语音、视频、文件等信息，也无法发送这些信息。
+6. 请尽量以对方的昵称来称呼用户，而不是对方的id。
+7. 对于专业的问题，请使用专业的语言回答，但也不要过于正式。
 
 在回复时，你必须使用 xml 格式输出你的回复。你可以使用以下 xml 标签持久化保存记忆，更新的记忆将用于下一次回复：
 
@@ -46,6 +49,8 @@ func LLMMsgHandle(c *qbot.Client, msg *qbot.Message) bool {
 4. 普通的回复应简短，如果你的回复比较长（比如有人问一些专业的问题），可以在一次回复中将长文本拆成多条信息（每一段都作为一条回复）。请保证每次至少发送一条消息。
 <msg>消息内容</msg>
 如果你需要@其他人，请在<msg>标签中使用 [CQ:at,qq=<id>] 的形式。例如：发送 [CQ:at,qq=1006554341]可以@用户1006554341。
+
+5. 换行不使用<br>，而是直接在<msg>块中换行。如果你的消息可能包含多段内容，请使用多个<msg>标签。
 
 下面是一个示例，这段示例将更新记忆中的用户昵称、用户信息和群聊信息，并发送三条消息：
 <nickname id="1006554341">氟氟</nickname>
@@ -139,37 +144,24 @@ func LLMMsgHandle(c *qbot.Client, msg *qbot.Message) bool {
 
 	var usersInfo string
 	for id, info := range userMap {
-		usersInfo += fmt.Sprintf("nick_name=%q,id=%d,summary=%q\n", info.NickName, id, info.Summary)
+		usersInfo += fmt.Sprintf("nick_name:%q,id:%d,user_info:%q\n", info.NickName, id, info.Summary)
 	}
 
 	req.Messages = append(req.Messages, Grok2Message{
-		Role:    "user",
-		Content: "以下是聊天参与者的昵称和相关信息，这些信息是之前由你生成的，你可以使用 <nickname> 或 <user_info> 标签来更改这些信息：\n" + usersInfo,
+		Role: "user",
+		Content: "以下是聊天参与者的昵称和相关信息，这些信息是之前由你生成的，你可以使用 <nickname> 或 <user_info> 标签来更改这些信息：\n" +
+			usersInfo,
 	})
 
 	var chatHistory string
 	for i := len(histories) - 1; i >= 0; i-- {
-		localTime := histories[i].Time.In(time.FixedZone("UTC+8", 8*60*60))
-		if histories[i].UserID == config.BotID {
-			if chatHistory != "" {
-				req.Messages = append(req.Messages, Grok2Message{
-					Role:    "user",
-					Content: chatHistory,
-				})
-				chatHistory = ""
-			}
-			req.Messages = append(req.Messages, Grok2Message{
-				Role:    "assistant",
-				Content: localTime.Format("2006-01-02 15:04:05 ") + histories[i].Content,
-			})
-		} else {
-			chatHistory += formatMsg(histories[i].Time, userMap[histories[i].UserID].NickName, histories[i].UserID, histories[i].Content)
-		}
+		chatHistory += formatMsg(histories[i].Time, userMap[histories[i].UserID].NickName, histories[i].UserID, histories[i].Content)
 	}
 	if chatHistory != "" {
 		req.Messages = append(req.Messages, Grok2Message{
-			Role:    "user",
-			Content: chatHistory,
+			Role: "user",
+			Content: "以下是聊天记录，其中可能包含你自己发送的信息。你的id是" +
+				strconv.FormatUint(config.BotID, 10) + "\n" + chatHistory,
 		})
 	}
 
