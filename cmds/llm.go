@@ -19,6 +19,8 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 		MaxHistory int
 		Enabled    bool
 		Debug      bool
+		Supplier   string
+		Model      string
 	}
 
 	err := qbot.PsqlDB.Table("group_llm_configs").
@@ -31,11 +33,15 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			MaxHistory int
 			Enabled    bool
 			Debug      bool
+			Supplier   string
+			Model      string
 		}{
 			Prompt:     "你是一个群聊机器人，请你陪伴群友们聊天，注意请不要使用Markdown语法。",
 			MaxHistory: 200,
 			Enabled:    true,
 			Debug:      false,
+			Supplier:   "grok",
+			Model:      "grok-2-latest",
 		}
 		qbot.PsqlDB.Table("group_llm_configs").Create(map[string]any{
 			"group_id":    msg.GroupID,
@@ -43,6 +49,8 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			"max_history": llmConfig.MaxHistory,
 			"enabled":     llmConfig.Enabled,
 			"debug":       llmConfig.Debug,
+			"supplier":    "grok",
+			"model":       "grok-2-latest",
 		})
 	}
 
@@ -58,7 +66,7 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			if err != nil {
 				c.SendMsg(msg, err.Error())
 			} else {
-				c.SendMsg(msg, "prompt 已更新")
+				c.SendMsg(msg, "prompt updated")
 			}
 		}
 
@@ -68,24 +76,24 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 		} else {
 			maxHistory, err := strconv.Atoi(args.Contents[2])
 			if err != nil {
-				c.SendMsg(msg, "请输入有效的数字")
+				c.SendMsg(msg, "Enter a valid number")
 				return
 			}
 			if maxHistory < 0 {
-				c.SendMsg(msg, "max-history 不能为负值")
+				c.SendMsg(msg, "max-history cannot be negative")
 				return
 			}
 			if maxHistory > 300 {
-				c.SendMsg(msg, "max-history 不能超过 300")
+				c.SendMsg(msg, "max-history cannot exceed 300")
 				return
 			}
 			err = qbot.PsqlDB.Table("group_llm_configs").
 				Where("group_id = ?", msg.GroupID).
 				Update("max_history", maxHistory).Error
 			if err != nil {
-				c.SendMsg(msg, "设置失败: "+err.Error())
+				c.SendMsg(msg, "Failed: "+err.Error())
 			} else {
-				c.SendMsg(msg, "max-history 已更新")
+				c.SendMsg(msg, "max-history updated")
 			}
 		}
 
@@ -96,7 +104,7 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 		if err != nil {
 			c.SendMsg(msg, err.Error())
 		} else {
-			c.SendMsg(msg, "已启用本群 LLM 功能")
+			c.SendMsg(msg, "Enabled LLM")
 		}
 
 	case "disable":
@@ -106,35 +114,36 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 		if err != nil {
 			c.SendMsg(msg, err.Error())
 		} else {
-			c.SendMsg(msg, "已禁用本群 LLM 功能")
+			c.SendMsg(msg, "Disabled LLM")
 		}
 
 	case "status":
-		status := fmt.Sprintf("enabled: %v\nmax-history: %d\nprompt: %s",
+		status := fmt.Sprintf("enabled: %v\nmax-history: %d\nsupplier: %q\nmodel: %q\nprompt: %q",
 			llmConfig.Enabled,
 			llmConfig.MaxHistory,
-			llmConfig.Prompt)
+			llmConfig.Supplier,
+			llmConfig.Model,
+			llmConfig.Prompt,
+		)
 		c.SendMsg(msg, status)
 
 	case "tokens":
 		var user qbot.Users
 		if args.Size == 2 {
-			// 查看自己的 token 使用量
 			err := qbot.PsqlDB.Where("user_id = ?", msg.UserID).First(&user).Error
 			if err != nil {
-				c.SendMsg(msg, "获取 token 使用量失败")
+				c.SendMsg(msg, "Failed to get token usage")
 				return
 			}
-			c.SendMsg(msg, fmt.Sprintf("你的 token 使用量：%d", user.TokenUsage))
+			c.SendMsg(msg, fmt.Sprintf("Token usage: %d", user.TokenUsage))
 		} else if args.Size == 3 && args.Types[2] == qbot.At {
-			// 查看其他人的 token 使用量
 			targetID := str2uin64(args.Contents[2])
 			err := qbot.PsqlDB.Where("user_id = ?", targetID).First(&user).Error
 			if err != nil {
-				c.SendMsg(msg, "获取 token 使用量失败")
+				c.SendMsg(msg, "Failed to get token usage")
 				return
 			}
-			c.SendMsg(msg, fmt.Sprintf("用户 %s 的 token 使用量：%d", args.Contents[2], user.TokenUsage))
+			c.SendMsg(msg, fmt.Sprintf("Token usage for %s: %d", args.Contents[2], user.TokenUsage))
 		} else {
 			c.SendMsg(msg, "Usage:\nllm tokens\nllm tokens @user")
 		}
@@ -158,7 +167,44 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			}
 		}
 
+	case "supplier":
+		if args.Size == 2 {
+			c.SendMsg(msg, fmt.Sprintf("supplier: %s", llmConfig.Supplier))
+		} else {
+			newSupplier := args.Contents[2]
+			switch newSupplier {
+			case "grok":
+			case "siliconflow":
+			default:
+				c.SendMsg(msg, "Invalid supplier. Use 'grok' or 'siliconflow'.")
+				return
+			}
+			err := qbot.PsqlDB.Table("group_llm_configs").
+				Where("group_id = ?", msg.GroupID).
+				Update("supplier", newSupplier).Error
+			if err != nil {
+				c.SendMsg(msg, err.Error())
+			} else {
+				c.SendMsg(msg, fmt.Sprintf("supplier updated to %s", newSupplier))
+			}
+		}
+
+	case "model":
+		if args.Size == 2 {
+			c.SendMsg(msg, fmt.Sprintf("model: %s", llmConfig.Model))
+		} else {
+			newModel := args.Contents[2]
+			err := qbot.PsqlDB.Table("group_llm_configs").
+				Where("group_id = ?", msg.GroupID).
+				Update("model", newModel).Error
+			if err != nil {
+				c.SendMsg(msg, err.Error())
+			} else {
+				c.SendMsg(msg, fmt.Sprintf("model updated to %s", newModel))
+			}
+		}
+
 	default:
-		c.SendMsg(msg, fmt.Sprintf("不能理解的参数 >>%s<<", args.Contents[1]))
+		c.SendMsg(msg, fmt.Sprintf("Unrecognized parameter >>%s<<", args.Contents[1]))
 	}
 }

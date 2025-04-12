@@ -10,19 +10,19 @@ import (
 	"net/http"
 )
 
-type Grok2Message struct {
+type LLMMsg struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
-type Grok2Request struct {
-	Messages    []Grok2Message `json:"messages"`
-	Model       string         `json:"model"`
-	Stream      bool           `json:"stream"`
-	Temperature float64        `json:"temperature"`
+type LLMRequest struct {
+	Messages    []LLMMsg `json:"messages"`
+	Model       string   `json:"model"`
+	Stream      bool     `json:"stream"`
+	Temperature float64  `json:"temperature"`
 }
 
-type Grok2Response struct {
+type LLMResponse struct {
 	ID      string `json:"id"`
 	Object  string `json:"object"`
 	Created int64  `json:"created"`
@@ -51,20 +51,30 @@ type Grok2Response struct {
 	SystemFingerprint string `json:"system_fingerprint"`
 }
 
-func SendGrok2Request(request *Grok2Request) (result *Grok2Response, err error) {
-	if request == nil {
+func SendLLMRequest(supplier string, request *LLMRequest) (result *LLMResponse, err error) {
+	var baseUrl, apiKey, erikaGrok2Key string
+	switch supplier {
+	case "grok":
+		baseUrl = "https://grok.cclvi.cc/v1/chat/completions"
+		apiKey = config.XaiApiKey
+		erikaGrok2Key = config.ErikaGrok2Key
+	case "siliconflow":
+		baseUrl = "https://api.siliconflow.com/v1/chat/completions"
+		apiKey = config.SiliconflowApiKey
+	default:
+		return nil, errors.New("invalid supplier")
+	}
+
+	switch {
+	case request == nil:
 		return nil, errors.New("request is nil")
 	}
+
 	jsonBytes, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
 	requestJson := string(jsonBytes)
-
-	apiKey := config.XaiApiKey
-	if apiKey == "" {
-		return nil, errors.New("no x.ai api key")
-	}
 
 	client := &http.Client{}
 
@@ -75,22 +85,17 @@ func SendGrok2Request(request *Grok2Request) (result *Grok2Response, err error) 
 		}
 	}
 
-	requestURL := "https://api.x.ai/v1/chat/completions"
-	if config.ErikaGrok2Key != "" {
-		requestURL = "https://grok.cclvi.cc/v1/chat/completions"
-	}
-
-	req, err := http.NewRequest("POST", requestURL, bytes.NewBuffer([]byte(requestJson)))
+	req, err := http.NewRequest("POST", baseUrl, bytes.NewBuffer([]byte(requestJson)))
 	if err != nil {
 		return nil, err
 	}
 
-	if config.ErikaGrok2Key != "" {
-		req.Header.Set("X-Proxy-Key", config.ErikaGrok2Key)
-	}
-
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	if erikaGrok2Key != "" {
+		req.Header.Set("X-Proxy-Key", erikaGrok2Key)
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -104,7 +109,7 @@ func SendGrok2Request(request *Grok2Request) (result *Grok2Response, err error) 
 	}
 
 	if resp.StatusCode == http.StatusOK {
-		ret := &Grok2Response{}
+		ret := &LLMResponse{}
 		if err := json.Unmarshal(body, ret); err != nil {
 			return nil, err
 		}

@@ -27,5 +27,7 @@ CREATE TABLE group_llm_configs (
     "enabled"     BOOLEAN NOT NULL DEFAULT TRUE,
     "info"        TEXT,
     "debug"       BOOLEAN NOT NULL DEFAULT FALSE,
+    "supplier"    TEXT,
+    "model"       TEXT,
     PRIMARY KEY ("group_id")
 );
