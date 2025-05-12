@@ -77,6 +77,41 @@ func (c *Client) SetGroupAdmin(groupID uint64, userID uint64, enable bool) error
 	return err
 }
 
+func (c *Client) SetGroupBan(groupID uint64, userID uint64, duration int) error {
+	req := cqRequest{
+		Action: "set_group_ban",
+		Params: map[string]any{
+			"group_id": groupID,
+			"user_id":  userID,
+			"duration": duration,
+		},
+	}
+	err := c.sendJson(&req)
+	return err
+}
+
+func (c *Client) SetGroupEssence(msgID uint64) error {
+	req := cqRequest{
+		Action: "set_essence_msg",
+		Params: map[string]any{
+			"message_id": msgID,
+		},
+	}
+	err := c.sendJson(&req)
+	return err
+}
+
+func (c *Client) DeleteGroupEssence(msgID uint64) error {
+	req := cqRequest{
+		Action: "delete_essence_msg",
+		Params: map[string]any{
+			"message_id": msgID,
+		},
+	}
+	err := c.sendJson(&req)
+	return err
+}
+
 func (c *Client) DeleteMsg(msgID uint64) error {
 	req := cqRequest{
 		Action: "delete_msg",

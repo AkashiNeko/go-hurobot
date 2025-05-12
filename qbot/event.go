@@ -12,23 +12,23 @@ func parseContent(msgarr *[]MsgItem) (result string) {
 		case Text:
 			result += item.Content
 		case At:
-			result += "@" + item.Content + " "
+			result += "[CQ:at,qq=" + item.Content + "]"
 		case Face:
-			biaoqing := getQFaceNameByStrID(item.Content)
-			log.Println(biaoqing)
-			result += "{表情:" + biaoqing + "}"
+			faceName := getQFaceNameByStrID(item.Content)
+			log.Println(faceName)
+			result += "[CQ:face,id=" + item.Content + "](" + faceName + ")"
 		case Image:
-			result += "{图片:" + item.Content + "}"
+			result += "[图片(无法查看)]"
 		case Record:
-			result = "语音:" + item.Content
+			result = "[语音(无法查看)]"
 		case Reply:
-			result = "回复:" + item.Content + "\n"
+			result = ""
 		case File:
-			result = "文件:" + item.Content
+			result = "[文件(无法查看)]"
 		case Forward:
-			result = "合并转发:" + item.Content
+			result = "[合并转发(无法查看)]"
 		case Json:
-			result = "json:" + item.Content
+			result = "[不支持的消息(无法查看)]"
 		}
 	}
 	return
