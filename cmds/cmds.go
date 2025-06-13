@@ -23,9 +23,9 @@ var cmdMap map[string]CmdHandler
 
 func init() {
 	cmdMap = map[string]CmdHandler{
-		"echo":         cmd_echo,
-		"rawmsg":       cmd_rawmsg,
-		"grok2":        cmd_grok2,
+		"echo":   cmd_echo,
+		"rawmsg": cmd_rawmsg,
+
 		"specialtitle": cmd_specialtitle,
 		"sh":           cmd_sh,
 		"psql":         cmd_psql,

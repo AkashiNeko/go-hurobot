@@ -2,20 +2,16 @@ package config
 
 import (
 	"log"
-	"net/url"
 	"os"
 	"strconv"
 )
 
 var (
 	// export
-	XaiApiKey         string
 	SiliconflowApiKey string
 	NapcatWSURL       string
 	MasterID          uint64
 	BotID             uint64
-	ProxyURL          *url.URL
-	ErikaGrok2Key     string
 
 	PsqlHost     string
 	PsqlPort     uint16
@@ -28,12 +24,9 @@ const (
 	// environment values
 	env_NAPCAT_HOST         = "NAPCAT_HOST"
 	env_ACCESS_TOKEN        = "ACCESS_TOKEN"
-	env_XAI_API_KEY         = "XAI_API_KEY"
 	env_SILICONFLOW_API_KEY = "SILICONFLOW_API_KEY"
 	env_MASTER_ID           = "MASTER_ID"
 	env_BOT_ID              = "BOT_ID"
-	env_PROXY_URL           = "PROXY_URL"
-	env_ERIKA_GROK2_KEY     = "ERIKA_GROK2_KEY"
 
 	env_PSQL_HOST     = "PSQL_HOST"
 	env_PSQL_PORT     = "PSQL_PORT"
@@ -74,21 +67,9 @@ func getEnvPort(env string, def uint16) uint16 {
 	return uint16(ret)
 }
 
-func getEnvUrl(env string) *url.URL {
-	if val := os.Getenv(env); val != "" {
-		if ret, err := url.Parse(val); err == nil {
-			return ret
-		} else {
-			log.Fatalf("Parse port %s=%s failed: %s", env, val, err.Error())
-		}
-	}
-	return &url.URL{}
-}
-
 func init() {
 	napcatHost := getEnvString(env_NAPCAT_HOST, "127.0.0.1:3001")
 	accessToken := os.Getenv(env_ACCESS_TOKEN)
-	XaiApiKey = os.Getenv(env_XAI_API_KEY)
 	SiliconflowApiKey = os.Getenv(env_SILICONFLOW_API_KEY)
 
 	NapcatWSURL = "ws://" + napcatHost
@@ -98,8 +79,6 @@ func init() {
 
 	MasterID = getEnvUInt(env_MASTER_ID, 1006554341)
 	BotID = getEnvUInt(env_BOT_ID, 3552586437)
-	ProxyURL = getEnvUrl(env_PROXY_URL)
-	ErikaGrok2Key = os.Getenv(env_ERIKA_GROK2_KEY)
 	PsqlHost = getEnvString(env_PSQL_HOST, "127.0.0.1")
 	PsqlPort = getEnvPort(env_PSQL_PORT, 5432)
 	PsqlUser = os.Getenv(env_PSQL_USER)

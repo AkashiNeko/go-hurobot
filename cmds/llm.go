@@ -40,8 +40,8 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			MaxHistory: 200,
 			Enabled:    true,
 			Debug:      false,
-			Supplier:   "grok",
-			Model:      "grok-2-latest",
+			Supplier:   "siliconflow",
+			Model:      "deepseek-ai/DeepSeek-V2.5",
 		}
 		qbot.PsqlDB.Table("group_llm_configs").Create(map[string]any{
 			"group_id":    msg.GroupID,
@@ -49,8 +49,8 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			"max_history": llmConfig.MaxHistory,
 			"enabled":     llmConfig.Enabled,
 			"debug":       llmConfig.Debug,
-			"supplier":    "grok",
-			"model":       "grok-2-latest",
+			"supplier":    "siliconflow",
+			"model":       "deepseek-ai/DeepSeek-V2.5",
 		})
 	}
 
@@ -164,28 +164,6 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 				c.SendMsg(msg, err.Error())
 			} else {
 				c.SendMsg(msg, fmt.Sprintf("debug = %v", newDebug))
-			}
-		}
-
-	case "supplier":
-		if args.Size == 2 {
-			c.SendMsg(msg, fmt.Sprintf("supplier: %s", llmConfig.Supplier))
-		} else {
-			newSupplier := args.Contents[2]
-			switch newSupplier {
-			case "grok":
-			case "siliconflow":
-			default:
-				c.SendMsg(msg, "Invalid supplier. Use 'grok' or 'siliconflow'.")
-				return
-			}
-			err := qbot.PsqlDB.Table("group_llm_configs").
-				Where("group_id = ?", msg.GroupID).
-				Update("supplier", newSupplier).Error
-			if err != nil {
-				c.SendMsg(msg, err.Error())
-			} else {
-				c.SendMsg(msg, fmt.Sprintf("supplier updated to %s", newSupplier))
 			}
 		}
 
