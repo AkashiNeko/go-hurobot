@@ -8,10 +8,10 @@ import (
 
 var (
 	// export
-	SiliconflowApiKey string
-	NapcatWSURL       string
-	MasterID          uint64
-	BotID             uint64
+	ApiKey      string
+	NapcatWSURL string
+	MasterID    uint64
+	BotID       uint64
 
 	PsqlHost     string
 	PsqlPort     uint16
@@ -22,11 +22,11 @@ var (
 
 const (
 	// environment values
-	env_NAPCAT_HOST         = "NAPCAT_HOST"
-	env_ACCESS_TOKEN        = "ACCESS_TOKEN"
-	env_SILICONFLOW_API_KEY = "SILICONFLOW_API_KEY"
-	env_MASTER_ID           = "MASTER_ID"
-	env_BOT_ID              = "BOT_ID"
+	env_NAPCAT_HOST  = "NAPCAT_HOST"
+	env_ACCESS_TOKEN = "ACCESS_TOKEN"
+	env_API_KEY      = "API_KEY"
+	env_MASTER_ID    = "MASTER_ID"
+	env_BOT_ID       = "BOT_ID"
 
 	env_PSQL_HOST     = "PSQL_HOST"
 	env_PSQL_PORT     = "PSQL_PORT"
@@ -70,7 +70,7 @@ func getEnvPort(env string, def uint16) uint16 {
 func init() {
 	napcatHost := getEnvString(env_NAPCAT_HOST, "127.0.0.1:3001")
 	accessToken := os.Getenv(env_ACCESS_TOKEN)
-	SiliconflowApiKey = os.Getenv(env_SILICONFLOW_API_KEY)
+	ApiKey = os.Getenv(env_API_KEY)
 
 	NapcatWSURL = "ws://" + napcatHost
 	if accessToken != "" {

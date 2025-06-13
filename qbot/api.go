@@ -138,3 +138,7 @@ func (c *Client) SendMsg(msg *Message, message string) {
 		c.SendGroupMsg(msg.GroupID, message, false)
 	}
 }
+
+func (c *Client) SendImage(msg *Message, url string) {
+	c.SendMsg(msg, CQImage(url))
+}

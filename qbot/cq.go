@@ -17,3 +17,7 @@ func CQPoke(userId uint64) string {
 func CQRecord(text string) string {
 	return fmt.Sprintf("[CQ:record,file=https://akashi.top/tts-file-cache/%s]", text)
 }
+
+func CQImage(url string) string {
+	return fmt.Sprintf("[CQ:image,sub_type=0,url=%s]", url)
+}

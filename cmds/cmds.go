@@ -23,9 +23,7 @@ var cmdMap map[string]CmdHandler
 
 func init() {
 	cmdMap = map[string]CmdHandler{
-		"echo":   cmd_echo,
-		"rawmsg": cmd_rawmsg,
-
+		"echo":         cmd_echo,
 		"specialtitle": cmd_specialtitle,
 		"sh":           cmd_sh,
 		"psql":         cmd_psql,
@@ -34,8 +32,8 @@ func init() {
 		"llm":          cmd_llm,
 		"callme":       cmd_callme,
 		"debug":        cmd_debug,
-		"tts":          cmd_tts,
 		"essence":      cmd_essence,
+		"draw":         cmd_draw,
 	}
 
 	for key := range cmdMap {

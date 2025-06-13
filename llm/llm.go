@@ -21,7 +21,7 @@ func SendLLMRequest(supplier string, messages []openai.ChatCompletionMessagePara
 	case "siliconflow":
 		clientVal := openai.NewClient(
 			option.WithBaseURL("https://api.siliconflow.cn/v1"),
-			option.WithAPIKey(config.SiliconflowApiKey),
+			option.WithAPIKey(config.ApiKey),
 		)
 		client = &clientVal
 	default:
