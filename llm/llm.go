@@ -202,6 +202,28 @@ msg 有什么技术问题可以一起讨论哦
 	}
 
 	chatHistory := formatChatHistory(histories, userMap)
+
+	currentTime := time.Now().In(time.FixedZone("UTC+8", 8*60*60))
+	currentUserNickname := userMap[msg.UserID].NickName
+	if currentUserNickname == "" {
+		if msg.Nickname != "" {
+			currentUserNickname = msg.Nickname
+		} else if msg.Card != "" {
+			currentUserNickname = msg.Card
+		} else {
+			currentUserNickname = "未知用户"
+		}
+	}
+
+	currentMsgFormatted := fmt.Sprintf("\n%s\n%s(%d)说：\n <%d> %s\n",
+		currentTime.Format("15:04"),
+		currentUserNickname,
+		msg.UserID,
+		msg.MsgID,
+		msg.Content)
+
+	chatHistory += currentMsgFormatted
+
 	messages = append(messages, openai.UserMessage("以下是最近的聊天记录，请你根据最新的消息生成回复，之前的消息可作为参考。你的id是"+
 		strconv.FormatUint(config.BotID, 10)+"\n"+chatHistory))
 
