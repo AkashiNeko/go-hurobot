@@ -36,6 +36,7 @@ func init() {
 		"draw":         cmd_draw,
 		"er":           cmd_er,
 		"stock":        cmd_stock,
+		"crypto":       cmd_crypto,
 	}
 
 	for key := range cmdMap {
