@@ -18,6 +18,8 @@ var (
 	PsqlUser     string
 	PsqlPassword string
 	PsqlDbName   string
+
+	ExchangeRateAPIKey string
 )
 
 const (
@@ -33,6 +35,8 @@ const (
 	env_PSQL_USER     = "PSQL_USER"
 	env_PSQL_PASSWORD = "PSQL_PASSWORD"
 	env_PSQL_DBNAME   = "PSQL_DBNAME"
+
+	env_EXCHANGE_RATE_API_KEY = "EXCHANGE_RATE_API_KEY"
 )
 
 func getEnvString(env string, def string) string {
@@ -84,4 +88,5 @@ func init() {
 	PsqlUser = os.Getenv(env_PSQL_USER)
 	PsqlPassword = os.Getenv(env_PSQL_PASSWORD)
 	PsqlDbName = os.Getenv(env_PSQL_DBNAME)
+	ExchangeRateAPIKey = os.Getenv(env_EXCHANGE_RATE_API_KEY)
 }
