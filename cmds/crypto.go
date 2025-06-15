@@ -97,7 +97,7 @@ func handleSingleCrypto(c *qbot.Client, msg *qbot.Message, coin string) {
 		c.SendMsg(msg, fmt.Sprintf("查询失败: %s", err.Error()))
 		return
 	}
-	c.SendMsg(msg, fmt.Sprintf("%s 最新USDT价格: %s", coin, price))
+	c.SendMsg(msg, fmt.Sprintf("1 %s = %s USDT", coin, price))
 }
 
 func handleCryptoCurrencyPair(c *qbot.Client, msg *qbot.Message, fromCoin string, toCurrency string) {
@@ -132,7 +132,7 @@ func handleCryptoCurrencyPair(c *qbot.Client, msg *qbot.Message, fromCoin string
 
 	finalPrice := usdPriceFloat * exchangeRate
 	log.Printf("换算完成: %s USD价格 %.4f, 汇率 %.4f, 最终价格 %.4f %s", fromCoin, usdPriceFloat, exchangeRate, finalPrice, toCurrency)
-	c.SendMsg(msg, fmt.Sprintf("%s 最新%s价格: %.4f", fromCoin, toCurrency, finalPrice))
+	c.SendMsg(msg, fmt.Sprintf("1 %s=%.4f %s", fromCoin, finalPrice, toCurrency))
 }
 
 func getCryptoPrice(coin string, quoteCurrency string) (string, error) {
