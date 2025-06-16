@@ -20,7 +20,7 @@ type ExchangeRateResponse struct {
 
 func cmd_er(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 	if args.Size < 3 {
-		c.SendMsg(msg, "用法: er <源币种> <目标币种>\n例如: er CNY HKD")
+		c.SendMsg(msg, "用法: fx <源币种> <目标币种>\n例如: fx CNY HKD")
 		return
 	}
 

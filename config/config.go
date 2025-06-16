@@ -20,6 +20,7 @@ var (
 	PsqlDbName   string
 
 	ExchangeRateAPIKey string
+	OkxMirrorAPIKey    string
 )
 
 const (
@@ -37,6 +38,7 @@ const (
 	env_PSQL_DBNAME   = "PSQL_DBNAME"
 
 	env_EXCHANGE_RATE_API_KEY = "EXCHANGE_RATE_API_KEY"
+	env_OKX_MIRROR_API_KEY    = "OKX_MIRROR_API_KEY"
 )
 
 func getEnvString(env string, def string) string {
@@ -89,4 +91,5 @@ func init() {
 	PsqlPassword = os.Getenv(env_PSQL_PASSWORD)
 	PsqlDbName = os.Getenv(env_PSQL_DBNAME)
 	ExchangeRateAPIKey = os.Getenv(env_EXCHANGE_RATE_API_KEY)
+	OkxMirrorAPIKey = os.Getenv(env_OKX_MIRROR_API_KEY)
 }

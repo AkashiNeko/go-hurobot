@@ -34,8 +34,9 @@ func init() {
 		"debug":        cmd_debug,
 		"essence":      cmd_essence,
 		"draw":         cmd_draw,
-		"er":           cmd_er,
+		"fx":           cmd_er,
 		"stock":        cmd_stock,
+		"crypto":       cmd_crypto,
 	}
 
 	for key := range cmdMap {
