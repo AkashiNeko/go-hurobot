@@ -48,9 +48,12 @@ func init() {
 
 func HandleCommand(c *qbot.Client, msg *qbot.Message) bool {
 	skip := 0
+	if len(msg.Array) == 0 {
+		return false
+	}
 	if msg.Array[0].Type == qbot.Reply {
 		skip++
-		if len(msg.Array) != 1 && msg.Array[1].Type == qbot.At {
+		if len(msg.Array) > 1 && msg.Array[1].Type == qbot.At {
 			skip++
 		}
 	} else if msg.Array[0].Type == qbot.At {
