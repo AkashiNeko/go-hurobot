@@ -22,7 +22,7 @@ func parseContent(msgarr *[]MsgItem) (result string) {
 		case Record:
 			result = "[语音(无法查看)]"
 		case Reply:
-			result = ""
+			result = "[CQ:reply,id=" + item.Content + "]"
 		case File:
 			result = "[文件(无法查看)]"
 		case Forward:

@@ -41,6 +41,11 @@ const (
 	env_OKX_MIRROR_API_KEY    = "OKX_MIRROR_API_KEY"
 )
 
+var BotOwnerGroupIDs = []uint64{
+	948697448,
+	866738031,
+}
+
 func getEnvString(env string, def string) string {
 	val := os.Getenv(env)
 	if val == "" {

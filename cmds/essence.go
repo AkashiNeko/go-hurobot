@@ -1,12 +1,14 @@
 package cmds
 
 import (
+	"go-hurobot/config"
 	"go-hurobot/qbot"
+	"slices"
 	"strconv"
 )
 
 func cmd_essence(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
-	if raw.GroupID != 948697448 {
+	if !slices.Contains(config.BotOwnerGroupIDs, raw.GroupID) {
 		return
 	}
 	help := "请回复一条消息，再使用 essence [set|delete]"

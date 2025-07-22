@@ -1,11 +1,17 @@
 package cmds
 
 import (
+	"go-hurobot/config"
 	"go-hurobot/qbot"
+	"slices"
 	"strconv"
 )
 
 func cmd_specialtitle(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
+	if !slices.Contains(config.BotOwnerGroupIDs, msg.GroupID) {
+		return
+	}
+
 	if args.Size == 1 {
 		c.SendReplyMsg(msg, "Usage: specialtitle <specialtitle>")
 	} else if len(msg.Array) > 1 && msg.Array[1].Type != qbot.At {
@@ -15,7 +21,7 @@ func cmd_specialtitle(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 	} else {
 		if len(msg.Array) > 1 {
 			id := str2uin64(msg.Array[1].Content)
-			c.SetGroupSpecialTitle(msg.GroupID, id, args.Contents[1])
+			c.SetGroupSpecialTitle(msg.GroupID, id, decodeSpecialChars(args.Contents[1]))
 			return
 		}
 		c.SetGroupSpecialTitle(msg.GroupID, msg.UserID, args.Contents[1])

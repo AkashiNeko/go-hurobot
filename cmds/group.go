@@ -2,13 +2,15 @@ package cmds
 
 import (
 	"fmt"
+	"go-hurobot/config"
 	"go-hurobot/qbot"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 func cmd_group(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
-	if raw.GroupID != 948697448 {
+	if !slices.Contains(config.BotOwnerGroupIDs, raw.GroupID) {
 		return
 	}
 	const help = "Usage: group [rename <group name> | op | deop | banme <time>]"

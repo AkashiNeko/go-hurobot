@@ -158,6 +158,8 @@ func decodeSpecialChars(raw string) string {
 		"&#91;", "[",
 		"&#93;", "]",
 		"&amp;", "&",
+		"&lt;", "<",
+		"&gt;", ">",
 	)
 	return replacer.Replace(raw)
 }
@@ -167,6 +169,8 @@ func encodeSpecialChars(raw string) string {
 		"[", "&#91;",
 		"]", "&#93;",
 		"&", "&amp;",
+		"<", "&lt;",
+		">", "&gt;",
 	)
 	return replacer.Replace(raw)
 }

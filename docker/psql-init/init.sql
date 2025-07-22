@@ -31,3 +31,5 @@ CREATE TABLE group_llm_configs (
     "model"       TEXT,
     PRIMARY KEY ("group_id")
 );
+
+CREATE INDEX idx_messages_covering ON messages("group_id", "is_cmd", "time" DESC, "user_id", "content", "msg_id");
