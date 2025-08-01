@@ -45,9 +45,11 @@ func SendLLMRequest(supplier string, messages []openai.ChatCompletionMessagePara
 
 func LLMMsgHandle(c *qbot.Client, msg *qbot.Message) bool {
 	reply := false
-	for _, item := range msg.Array {
-		if item.Type == qbot.At && item.Content == strconv.FormatUint(config.BotID, 10) {
-			reply = true
+	if reply = strings.Contains(msg.Raw, "狐萝卜"); !reply {
+		for _, item := range msg.Array {
+			if item.Type == qbot.At && item.Content == strconv.FormatUint(config.BotID, 10) {
+				reply = true
+			}
 		}
 	}
 	if !reply {

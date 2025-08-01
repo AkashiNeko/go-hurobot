@@ -30,13 +30,22 @@ type Messages struct {
 	Time    time.Time `gorm:"not null;column:time"`
 }
 
+type UserEvents struct {
+	UserID    uint64    `gorm:"primaryKey;column:user_id"`
+	EventIdx  int       `gorm:"primaryKey;column:event_idx"`
+	MsgRegex  string    `gorm:"not null;column:msg_regex"`
+	ReplyText string    `gorm:"not null;column:reply_text"`
+	RandProb  float32   `gorm:"not null;column:rand_prob;default:1.0"`
+	CreatedAt time.Time `gorm:"not null;column:created_at;default:now()"`
+}
+
 func initPsqlDB(dsn string) error {
 	var err error
 	if PsqlDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
 		return err
 	}
 	PsqlConnected = true
-	return PsqlDB.AutoMigrate(&Users{}, &Messages{})
+	return PsqlDB.AutoMigrate(&Users{}, &Messages{}, &UserEvents{})
 }
 
 func SaveDatabase(msg *Message, isCmd bool) error {

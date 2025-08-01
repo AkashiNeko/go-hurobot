@@ -3,15 +3,10 @@ package main
 import (
 	"strings"
 
-	"go-hurobot/llm"
 	"go-hurobot/qbot"
 )
 
 func customReply(c *qbot.Client, msg *qbot.Message) {
-	if llm.LLMMsgHandle(c, msg) {
-		return
-	}
-
 	// 2025-03-08 晚上，让 bot 在某 mc 群发电加的
 	if msg.GroupID == 738943282 {
 		if strings.Contains(msg.Raw, "厉厉厉害害") || strings.Contains(msg.Raw, "厉厉害害害") {

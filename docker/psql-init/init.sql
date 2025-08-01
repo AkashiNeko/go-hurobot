@@ -33,3 +33,16 @@ CREATE TABLE group_llm_configs (
 );
 
 CREATE INDEX idx_messages_covering ON messages("group_id", "is_cmd", "time" DESC, "user_id", "content", "msg_id");
+
+CREATE TABLE user_events (
+    "user_id"    BIGINT NOT NULL,
+    "event_idx"  INTEGER NOT NULL,
+    "msg_regex"  TEXT NOT NULL,
+    "reply_text" TEXT NOT NULL,
+    "rand_prob"  REAL NOT NULL DEFAULT 1.0,
+    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    PRIMARY KEY ("user_id", "event_idx"),
+    FOREIGN KEY ("user_id") REFERENCES users(user_id),
+    CONSTRAINT check_rand_prob CHECK (rand_prob >= 0.0 AND rand_prob <= 1.0),
+    CONSTRAINT check_event_idx CHECK (event_idx >= 0 AND event_idx <= 9)
+);
