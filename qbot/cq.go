@@ -21,3 +21,11 @@ func CQRecord(text string) string {
 func CQImage(url string) string {
 	return fmt.Sprintf("[CQ:image,sub_type=0,url=%s]", url)
 }
+
+func CQRps() string {
+	return "[CQ:rps]"
+}
+
+func CQDice() string {
+	return "[CQ:dice]"
+}

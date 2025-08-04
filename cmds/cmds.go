@@ -38,6 +38,8 @@ func init() {
 		"crypto":       cmd_crypto,
 		"event":        cmd_event,
 		"sh":           cmd_sh,
+		"rps":          cmd_rps,
+		"dice":         cmd_dice,
 	}
 
 	for key := range cmdMap {
