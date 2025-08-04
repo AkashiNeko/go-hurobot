@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var workingDir string = "/home/qwq"
+var workingDir string = "/tmp"
 
 func truncateString(s string) string {
 	s = encodeSpecialChars(s)
@@ -41,23 +41,20 @@ func truncateString(s string) string {
 }
 
 func cmd_sh(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
-	if msg.GroupID == 0 && msg.UserID != config.MasterID {
-		c.SendReplyMsg(msg, "请在群内使用")
+	if msg.UserID != config.MasterID {
 		return
 	}
 
 	if args.Size <= 1 {
-		c.SendReplyMsg(msg, "Usage: sh <linux command>")
+		c.SendReplyMsg(msg, "Usage: sh <command>")
 		return
 	}
 
 	rawcmd := decodeSpecialChars(msg.Raw[3:])
 
 	if strings.HasPrefix(args.Contents[1], "cd") {
-
-		absPath, err := exec.Command("docker", "exec", "-i", "-u", "1000",
-			"-w", workingDir, "ubuntu", "bash", "-c",
-			fmt.Sprintf("%s && pwd", rawcmd)).CombinedOutput()
+		absPath, err := exec.Command("bash", "-c",
+			fmt.Sprintf("cd %s && %s && pwd", workingDir, rawcmd)).CombinedOutput()
 
 		if err != nil {
 			c.SendReplyMsg(msg, err.Error())
@@ -69,8 +66,7 @@ func cmd_sh(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 		return
 	}
 
-	cmd := exec.Command("docker", "exec", "-i", "-u", "1000",
-		"-w", workingDir, "ubuntu", "bash", "-c", rawcmd)
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("cd %s && %s", workingDir, rawcmd))
 
 	done := make(chan error, 1)
 	var output []byte
