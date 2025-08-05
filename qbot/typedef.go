@@ -89,11 +89,31 @@ type cqRequest struct {
 	Echo   string         `json:"echo,omitempty"`
 }
 
+type GroupMemberInfo struct {
+	GroupID         uint64 `json:"group_id"`
+	UserID          uint64 `json:"user_id"`
+	Nickname        string `json:"nickname"`
+	Card            string `json:"card"`
+	Sex             string `json:"sex"`
+	Age             int32  `json:"age"`
+	Area            string `json:"area"`
+	JoinTime        int32  `json:"join_time"`
+	LastSentTime    int32  `json:"last_sent_time"`
+	Level           string `json:"level"`
+	Role            string `json:"role"`
+	Unfriendly      bool   `json:"unfriendly"`
+	Title           string `json:"title"`
+	TitleExpireTime int64  `json:"title_expire_time"`
+	CardChangeable  bool   `json:"card_changeable"`
+	ShutUpTimestamp int64  `json:"shut_up_timestamp"`
+}
+
 type cqResponse struct {
 	Status  string `json:"status"`
 	Retcode int    `json:"retcode"`
 	Data    struct {
 		MessageId uint64 `json:"message_id"`
+		GroupMemberInfo
 	}
 	Message string `json:"message"`
 	Wording string `json:"wording"`

@@ -142,3 +142,19 @@ func (c *Client) SendMsg(msg *Message, message string) {
 func (c *Client) SendImage(msg *Message, url string) {
 	c.SendMsg(msg, CQImage(url))
 }
+
+func (c *Client) GetGroupMemberInfo(groupID uint64, userID uint64, noCache bool) (*GroupMemberInfo, error) {
+	req := cqRequest{
+		Action: "get_group_member_info",
+		Params: map[string]any{
+			"group_id": groupID,
+			"user_id":  userID,
+			"no_cache": noCache,
+		},
+	}
+	resp, err := c.sendJsonWithEcho(&req)
+	if err != nil {
+		return nil, err
+	}
+	return &resp.Data.GroupMemberInfo, nil
+}
