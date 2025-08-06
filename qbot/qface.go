@@ -185,7 +185,7 @@ var qfaceMap = map[int]string{
 	395: "略略略",
 }
 
-func getQFaceNameByStrID(id string) string {
+func GetQFaceNameByStrID(id string) string {
 	if idn, err := strconv.Atoi(id); err == nil {
 		if found, exists := qfaceMap[idn]; exists {
 			return found

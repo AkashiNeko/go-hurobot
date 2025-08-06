@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -8,6 +9,7 @@ import (
 	"go-hurobot/qbot"
 
 	"github.com/gorcon/rcon"
+	"gorm.io/gorm"
 )
 
 func cmd_mc(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
@@ -21,6 +23,11 @@ func cmd_mc(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 	result := qbot.PsqlDB.Where("group_id = ?", raw.GroupID).First(&rconConfig)
 
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// Silently return if RCON not configured for this group
+			return
+		}
+		// Log other database errors if needed
 		return
 	}
 
@@ -72,68 +79,6 @@ func executeRconCommand(address, password, command string) (string, error) {
 	}
 
 	return response, nil
-}
-
-// ForwardMessageToMC forwards a group message to Minecraft server if RCON is enabled
-func ForwardMessageToMC(c *qbot.Client, msg *qbot.Message) {
-	// Skip bot's own messages
-	if msg.UserID == config.BotID {
-		return
-	}
-
-	// Get RCON configuration for this group
-	var rconConfig qbot.GroupRconConfigs
-	result := qbot.PsqlDB.Where("group_id = ?", msg.GroupID).First(&rconConfig)
-
-	// Skip if RCON not configured or disabled
-	if result.Error != nil || !rconConfig.Enabled {
-		return
-	}
-
-	// Get user's nickname from database
-	var user qbot.Users
-	nickname := msg.Card // Default to group card name
-
-	userResult := qbot.PsqlDB.Where("user_id = ?", msg.UserID).First(&user)
-	if userResult.Error == nil && user.Nickname != "" {
-		nickname = user.Nickname
-	}
-
-	// Clean the message content for Minecraft (remove special characters)
-	cleanContent := cleanMessageForMC(msg.Content)
-
-	// Create tellraw command
-	tellrawCmd := fmt.Sprintf("tellraw @a {\"text\":\"<%s> %s\"}",
-		escapeMinecraftText(nickname),
-		escapeMinecraftText(cleanContent))
-
-	// Execute the command
-	executeRconCommand(rconConfig.Address, rconConfig.Password, tellrawCmd)
-}
-
-// cleanMessageForMC removes or replaces characters that might cause issues in Minecraft
-func cleanMessageForMC(content string) string {
-	// Remove or replace problematic characters
-	content = strings.ReplaceAll(content, "\n", " ")
-	content = strings.ReplaceAll(content, "\r", " ")
-	content = strings.ReplaceAll(content, "\t", " ")
-
-	// Remove multiple spaces
-	for strings.Contains(content, "  ") {
-		content = strings.ReplaceAll(content, "  ", " ")
-	}
-
-	return strings.TrimSpace(content)
-}
-
-// escapeMinecraftText escapes special characters for Minecraft JSON text
-func escapeMinecraftText(text string) string {
-	text = strings.ReplaceAll(text, "\\", "\\\\")
-	text = strings.ReplaceAll(text, "\"", "\\\"")
-	text = strings.ReplaceAll(text, "\n", "\\n")
-	text = strings.ReplaceAll(text, "\r", "\\r")
-	text = strings.ReplaceAll(text, "\t", "\\t")
-	return text
 }
 
 // isAllowedCommand checks if a command is allowed for non-master users

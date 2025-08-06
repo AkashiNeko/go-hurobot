@@ -14,7 +14,7 @@ func parseContent(msgarr *[]MsgItem) (result string) {
 		case At:
 			result += "[CQ:at,qq=" + item.Content + "]"
 		case Face:
-			faceName := getQFaceNameByStrID(item.Content)
+			faceName := GetQFaceNameByStrID(item.Content)
 			log.Println(faceName)
 			result += "[CQ:face,id=" + item.Content + "](" + faceName + ")"
 		case Image:

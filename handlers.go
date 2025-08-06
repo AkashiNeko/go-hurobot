@@ -4,6 +4,7 @@ import (
 	"go-hurobot/cmds"
 	"go-hurobot/config"
 	"go-hurobot/llm"
+	"go-hurobot/mc"
 	"go-hurobot/qbot"
 )
 
@@ -14,7 +15,7 @@ func messageHandler(c *qbot.Client, msg *qbot.Message) {
 
 		// Forward non-command messages to Minecraft if RCON is enabled
 		if !isCommand {
-			cmds.ForwardMessageToMC(c, msg)
+			mc.ForwardMessageToMC(c, msg)
 		}
 
 		if isCommand {
