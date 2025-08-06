@@ -41,6 +41,7 @@ func init() {
 		"rps":          cmd_rps,
 		"dice":         cmd_dice,
 		"memberinfo":   cmd_memberinfo,
+		"info":         cmd_info,
 	}
 
 	for key := range cmdMap {
