@@ -46,3 +46,11 @@ CREATE TABLE user_events (
     CONSTRAINT check_rand_prob CHECK (rand_prob >= 0.0 AND rand_prob <= 1.0),
     CONSTRAINT check_event_idx CHECK (event_idx >= 0 AND event_idx <= 9)
 );
+
+CREATE TABLE group_rcon_configs (
+    "group_id" BIGINT NOT NULL,
+    "address"  TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "enabled"  BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY ("group_id")
+);

@@ -26,6 +26,7 @@ require (
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/gorcon/rcon v1.4.0 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/longportapp/openapi-protobufs/gen/go v0.5.0 // indirect

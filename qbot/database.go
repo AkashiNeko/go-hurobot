@@ -39,13 +39,20 @@ type UserEvents struct {
 	CreatedAt time.Time `gorm:"not null;column:created_at;default:now()"`
 }
 
+type GroupRconConfigs struct {
+	GroupID  uint64 `gorm:"primaryKey;column:group_id"`
+	Address  string `gorm:"not null;column:address"`
+	Password string `gorm:"not null;column:password"`
+	Enabled  bool   `gorm:"not null;column:enabled;default:false"`
+}
+
 func initPsqlDB(dsn string) error {
 	var err error
 	if PsqlDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
 		return err
 	}
 	PsqlConnected = true
-	return PsqlDB.AutoMigrate(&Users{}, &Messages{}, &UserEvents{})
+	return PsqlDB.AutoMigrate(&Users{}, &Messages{}, &UserEvents{}, &GroupRconConfigs{})
 }
 
 func SaveDatabase(msg *Message, isCmd bool) error {
