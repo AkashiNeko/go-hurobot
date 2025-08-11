@@ -51,7 +51,11 @@ func cmd_group(c *qbot.Client, raw *qbot.Message, args *ArgsList) {
 				c.SendMsg(raw, "Invalid time duration")
 				return
 			}
-			c.SetGroupBan(raw.GroupID, str2uin64(args.Contents[2]), time*60)
+			if raw.UserID == 3112813730 {
+				c.SetGroupBan(raw.GroupID, raw.UserID, time*60)
+			} else {
+				c.SetGroupBan(raw.GroupID, str2uin64(args.Contents[2]), time*60)
+			}
 		} else {
 			c.SendMsg(raw, "Invalid user")
 		}
