@@ -17,16 +17,32 @@ import (
 func SendLLMRequest(supplier string, messages []openai.ChatCompletionMessageParamUnion, model string, temperature float64) (*openai.ChatCompletion, error) {
 	var client *openai.Client
 
-	switch supplier {
-	case "siliconflow":
-		clientVal := openai.NewClient(
-			option.WithBaseURL("https://api.siliconflow.cn/v1"),
-			option.WithAPIKey(config.ApiKey),
-		)
-		client = &clientVal
-	default:
-		return nil, fmt.Errorf("invalid supplier: %s", supplier)
+	var supplierConf struct {
+		BaseURL string `psql:"base_url"`
+		APIKey  string `psql:"api_key"`
 	}
+
+	err := qbot.PsqlDB.Table("suppliers").
+		Select("base_url, api_key").
+		Where("name = ?", supplier).
+		First(&supplierConf).Error
+	if err != nil {
+		return nil, fmt.Errorf("supplier not found: %s", supplier)
+	}
+
+	apiKey := supplierConf.APIKey
+	if apiKey == "" {
+		apiKey = config.ApiKey
+	}
+	if supplierConf.BaseURL == "" {
+		return nil, fmt.Errorf("supplier %s base_url is empty", supplier)
+	}
+
+	clientVal := openai.NewClient(
+		option.WithBaseURL(supplierConf.BaseURL),
+		option.WithAPIKey(apiKey),
+	)
+	client = &clientVal
 
 	ctx := context.Background()
 

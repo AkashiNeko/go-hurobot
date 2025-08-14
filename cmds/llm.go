@@ -10,7 +10,7 @@ import (
 
 func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 	if args.Size < 2 {
-		c.SendMsg(msg, "Usage:\nllm prompt [新提示词]\nllm max-history [能看见的历史消息数]\nllm enable/disable\nllm status")
+		c.SendMsg(msg, "Usage:\nllm prompt [新提示词]\nllm max-history [能看见的历史消息数]\nllm enable/disable\nllm status\nllm model [模型]\nllm supplier [API供应商]")
 		return
 	}
 
@@ -36,12 +36,12 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			Supplier   string
 			Model      string
 		}{
-			Prompt:     "你是一个群聊机器人，请你陪伴群友们聊天，注意请不要使用Markdown语法。",
+			Prompt:     "",
 			MaxHistory: 200,
 			Enabled:    true,
 			Debug:      false,
 			Supplier:   "siliconflow",
-			Model:      "deepseek-ai/DeepSeek-V2.5",
+			Model:      "deepseek-ai/DeepSeek-V3",
 		}
 		qbot.PsqlDB.Table("group_llm_configs").Create(map[string]any{
 			"group_id":    msg.GroupID,
@@ -49,8 +49,8 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 			"max_history": llmConfig.MaxHistory,
 			"enabled":     llmConfig.Enabled,
 			"debug":       llmConfig.Debug,
-			"supplier":    "siliconflow",
-			"model":       "deepseek-ai/DeepSeek-V2.5",
+			"supplier":    llmConfig.Supplier,
+			"model":       llmConfig.Model,
 		})
 	}
 
@@ -179,6 +179,49 @@ func cmd_llm(c *qbot.Client, msg *qbot.Message, args *ArgsList) {
 				c.SendMsg(msg, err.Error())
 			} else {
 				c.SendMsg(msg, fmt.Sprintf("model updated to %s", newModel))
+			}
+		}
+
+	case "supplier":
+		if args.Size == 2 {
+			c.SendMsg(msg, fmt.Sprintf("supplier: %s", llmConfig.Supplier))
+		} else {
+			newSupplier := args.Contents[2]
+
+			var exists int64
+			qbot.PsqlDB.Table("suppliers").
+				Where("name = ?", newSupplier).
+				Count(&exists)
+			if exists == 0 {
+				c.SendMsg(msg, fmt.Sprintf("unknown supplier: %s", newSupplier))
+				return
+			}
+
+			var sup struct {
+				DefaultModel string `psql:"default_model"`
+			}
+			qbot.PsqlDB.Table("suppliers").
+				Select("default_model").
+				Where("name = ?", newSupplier).
+				Scan(&sup)
+
+			// Update supplier
+			err := qbot.PsqlDB.Table("group_llm_configs").
+				Where("group_id = ?", msg.GroupID).
+				Update("supplier", newSupplier).Error
+			if err != nil {
+				c.SendMsg(msg, err.Error())
+				return
+			}
+
+			// Auto-switch model to supplier default if provided
+			if strings.TrimSpace(sup.DefaultModel) != "" {
+				_ = qbot.PsqlDB.Table("group_llm_configs").
+					Where("group_id = ?", msg.GroupID).
+					Update("model", sup.DefaultModel).Error
+				c.SendMsg(msg, fmt.Sprintf("supplier updated to %s, model -> %s", newSupplier, sup.DefaultModel))
+			} else {
+				c.SendMsg(msg, fmt.Sprintf("supplier updated to %s", newSupplier))
 			}
 		}
 
